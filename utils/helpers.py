@@ -2,11 +2,12 @@
 Helper functions for visualization, saving,
 and monitoring
 """
-from __future__ import print_function, division
-
+from __future__ import absolute_import, print_function
 import torch
-import os
-import time
+import matplotlib.pyplot as plt
+
+__all__ = ['AverageBase', 'RunningAverage', 'MovingAverage',
+           'plotLoss', 'load_checkpoint', 'save_checkpoint']
 
 class AverageBase(object):
     def __init__(self, value=0):
@@ -48,7 +49,7 @@ class MovingAverage(AverageBase):
 
     def update(self, value):
         if self.value is None:
-            self.value = flaot(value)
+            self.value = float(value)
         else:
             self.value = self.alpha * self.value + (1 - self.alpha) * float(value)
         return self.value
@@ -74,3 +75,16 @@ def save_checkpoint(optimizer, model, epoch, filename):
         'epoch' : epoch
     }
     torch.save(checkpoint_dict, filename)
+
+def plotLoss(train_losses,valid_losses):
+    # Visualize the Learning Curve
+    epochs = range(1, len(train_losses) + 1)
+    plt.figure(figsize=(10,6))
+    plt.plot(epochs, train_losses, '-o', label='Training loss')
+    plt.plot(epochs, valid_losses, '-o', label='Validation loss')
+    plt.legend()
+    plt.title('Learning Curve')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.xticks(epochs)
+    plt.show()

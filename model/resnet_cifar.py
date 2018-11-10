@@ -33,20 +33,20 @@ class BasicBlock(nn.Module):
     def forward(self, x):
         residual = x
 
-        x = self.conv1(x)
-        x = self.bn1(x)
-        x = self.relu(x)
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
 
-        x = self.conv2(x)
-        x = self.bn2(x)
+        out = self.conv2(out)
+        out = self.bn2(out)
 
         if self.downsample is not None:
-            residual = self.downsample(residual)
+            residual = self.downsample(out)
 
-        x += residual
-        x = self.relu(x)
+        out += residual
+        out = self.relu(out)
 
-        return x
+        return out
 
 class BottleNeck(nn.Module):
     """
@@ -72,24 +72,24 @@ class BottleNeck(nn.Module):
     def forward(self, x):
         residual = x
 
-        x = self.conv1(x)
-        x = self.bn1(x)
-        x = self.relu(x)
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
 
-        x = self.conv2(x)
-        x = self.bn2(x)
-        x = self.relu(x)
+        out = self.conv2(out)
+        out = self.bn2(out)
+        out = self.relu(out)
 
-        x = self.conv3(x)
-        x = self.bn3(x)
+        out = self.conv3(out)
+        out = self.bn3(out)
 
         if self.downsample is not None:
-            residual = self.downsample(residual)
+            residual = self.downsample(x)
 
-        x += residual
-        x = self.relu(x)
+        out += residual
+        out = self.relu(out)
 
-        return x
+        return out
 
 class ResNet(nn.Module):
     def __init__(self, depth, num_classes=1000):
@@ -103,11 +103,12 @@ class ResNet(nn.Module):
 
         self.inplanes = 16
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1, bias=False)
-        seld.bn1 = nn.BatchNorm2d(16)
+
+        self.bn1 = nn.BatchNorm2d(16)
         self.relu = nn.ReLU(inplace=True)
-        self.layer1 = self.__make_layer(block, 16, n)
-        self.layer2 = self.__make_layer(block, 32, n, stride=2)
-        self.layer3 = self.__make_layer(block, 64, n, stride=2)
+        self.layer1 = self._make_layer(block, 16, n)
+        self.layer2 = self._make_layer(block, 32, n, stride=2)
+        self.layer3 = self._make_layer(block, 64, n, stride=2)
         self.avgpool = nn.AvgPool2d(8)
         self.fc = nn.Linear(64 * block.expansion, num_classes)
 
@@ -119,37 +120,37 @@ class ResNet(nn.Module):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
 
-        def _make_layer(self, block, planes, blocks, stride=1):
-            downsample = None
-            if stride != 1 or self.inplanes != planes * block.expansion:
-                downsample == nn.Sequential(
-                    nn.Conv2d(self.inplanes, planes * block.expansion, kernel_size=1,
-                              stride=stride, bias=False),
-                    nn.BatchNorm2d(planes * block.expansion),
-                )
+    def _make_layer(self, block, planes, blocks, stride=1):
+        downsample = None
+        if stride != 1 or self.inplanes != planes * block.expansion:
+            downsample = nn.Sequential(
+                nn.Conv2d(self.inplanes, planes * block.expansion, kernel_size=1,
+                          stride=stride, bias=False),
+                nn.BatchNorm2d(planes * block.expansion),
+            )
+        
+        layers = []
+        layers.append(block(self.inplanes, planes, stride, downsample))
+        self.inplanes = planes * block.expansion
+        for i in range(1, blocks):
+            layers.append(block(self.inplanes, planes))
 
-            layers = []
-            layers.append(block(self.inplanes, planes, stride, downsample))
-            self.inplanes = planes * block.expansion
-            for i in range(1, blocks):
-                layers.append(block(self.inplane, planes))
+        return nn.Sequential(*layers)
 
-            return nn.Sequential(*layers)
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
 
-        def forward(self, x):
-            x = self.conv1(x)
-            x = self.bn1(x)
-            x = self.relu(x)
+        x = self.layer1(x)  # 32 x 32
+        x = self.layer2(x)  # 16 x 16
+        x = self.layer3(x)  # 8 x 8
 
-            x = self.layer1(x)  # 32 x 32
-            x = self.layer2(x)  # 16 x 16
-            x = self.layer3(x)  # 8 x 8
+        x = self.avgpool(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc(x)
 
-            x = self.avgpool(x)
-            x = x.view(x.size(0), -1)
-            x = self.fc(x)
-
-            return x
+        return x
 
 def resnet(**kwargs):
     """
