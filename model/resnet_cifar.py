@@ -33,20 +33,20 @@ class BasicBlock(nn.Module):
     def forward(self, x):
         residual = x
 
-        out = self.conv1(x)
-        out = self.bn1(out)
-        out = self.relu(out)
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
 
-        out = self.conv2(out)
-        out = self.bn2(out)
+        x = self.conv2(x)
+        x = self.bn2(x)
 
         if self.downsample is not None:
-            residual = self.downsample(out)
+            residual = self.downsample(residual)
 
-        out += residual
-        out = self.relu(out)
+        x += residual
+        x = self.relu(x)
 
-        return out
+        return x
 
 class BottleNeck(nn.Module):
     """
@@ -72,24 +72,24 @@ class BottleNeck(nn.Module):
     def forward(self, x):
         residual = x
 
-        out = self.conv1(x)
-        out = self.bn1(out)
-        out = self.relu(out)
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
 
-        out = self.conv2(out)
-        out = self.bn2(out)
-        out = self.relu(out)
+        x = self.conv2(x)
+        x = self.bn2(x)
+        x = self.relu(x)
 
-        out = self.conv3(out)
-        out = self.bn3(out)
+        x = self.conv3(x)
+        x = self.bn3(x)
 
         if self.downsample is not None:
-            residual = self.downsample(x)
+            residual = self.downsample(residual)
 
-        out += residual
-        out = self.relu(out)
+        x += residual
+        x = self.relu(x)
 
-        return out
+        return x
 
 class ResNet(nn.Module):
     def __init__(self, depth, num_classes=1000):
@@ -128,7 +128,7 @@ class ResNet(nn.Module):
                           stride=stride, bias=False),
                 nn.BatchNorm2d(planes * block.expansion),
             )
-        
+
         layers = []
         layers.append(block(self.inplanes, planes, stride, downsample))
         self.inplanes = planes * block.expansion
