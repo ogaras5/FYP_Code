@@ -132,7 +132,7 @@ def main():
             model.train()
 
             # Create progress bar
-            progress = MonitorProgress(total=len(train_set), epoch=epoch)
+            progress = MonitorProgress(total=len(train_set))
 
             # Save Training data
             train_loss = MovingAverage()
@@ -231,7 +231,7 @@ def main():
     # Check if the model is just being evaluted
     if args.evaluate:
         print('\nEvaluation only for {} epochs'.format(args.epochs))
-        # TODO: Create evaluation function 
+        # TODO: Create evaluation function
         #valid_losses, y_pred = test_model(model, criterion, args.epochs)
         return
 
