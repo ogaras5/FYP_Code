@@ -197,7 +197,8 @@ def main():
             valid_losses.append(valid_loss.value)
 
             # Calculate validation accuracy and see if it is the best accuracy
-            accuracy = torch.mean((y_pred == valid_set.classto_idx).float())
+            y_pred = torch.tensor(y_pred, dtype=torch.int64)
+            accuracy = torch.mean((y_pred == valid_set.test_labels).float())
             print('Validation accuracy: {:4f}%'.format(float(accuracy)*100))
             if accuracy > best_acc:
                 best_acc = accuracy

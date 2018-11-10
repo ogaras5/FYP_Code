@@ -37,4 +37,4 @@ class MonitorProgress(object):
 
         # Print New Line when complete
         if batch == self.total:
-            print()
+            print(flush=True)
