@@ -31,7 +31,7 @@ parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
 # Arguments for Optimization options
 parser.add_argument('--epochs', default=25, type=int, metavar='N',
                     help='number of epochs to train')
-parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
+parser.add_argument('--start-epoch', default=1, type=int, metavar='N',
                     help='epoch to start training on (must have checkpoint saved)')
 parser.add_argument('--train-batch', default=128, type=int, metavar='N',
                     help='batch size for training (default: 128)')
@@ -122,8 +122,8 @@ def main():
 
         best_acc = 0.0
 
-        for epoch in range(num_epochs):
-            print('Epoch: {}/{}'.format(epoch + 1, num_epochs))
+        for epoch in range(args.start_epoch, args.start_epoch + num_epochs):
+            print('Epoch: {}/{}'.format(epoch, num_epochs))
 
             # Each epoch has a training and a validation phase
             # Train Phase
@@ -197,21 +197,22 @@ def main():
             valid_losses.append(valid_loss.value)
 
             # Calculate validation accuracy and see if it is the best accuracy
+            y_true = torch.tensor(valid_set.test_labels, dtype=torch.int64)
             y_pred = torch.tensor(y_pred, dtype=torch.int64)
-            accuracy = torch.mean((y_pred == valid_set.test_labels).float())
+            accuracy = torch.mean((y_pred == y_true).float())
             print('Validation accuracy: {:4f}%'.format(float(accuracy)*100))
             if accuracy > best_acc:
                 best_acc = accuracy
 
             # Save checkpoint
-            checkpoint_filename = './checkpoints/benchmark-{:03d}.pkl'.format(epoch + args.start_epoch)
+            checkpoint_filename = './checkpoints/benchmark-{:03d}.pkl'.format(epoch)
             save_checkpoint(optimizer, model, epoch, checkpoint_filename)
 
         # Give some details about how
         time_elapsed = time.time() - since
         print('Training complete in {:.0f}m {:.0f}s'.format(
                time_elapsed // 60, time_elapsed % 60))
-        print('Best value Accuracy: {:4f}'.format(best_acc))
+        print('Best value Accuracy: {:4f}%'.format(float(best_acc)*100))
         return train_losses, valid_losses, y_pred
 
     # Model

@@ -32,9 +32,9 @@ class MonitorProgress(object):
         percent = ("{0:." + str(self.decimals) + "f}").format(100 * (self.batch / float(self.total)))
         filled_length = int(self.length * self.batch // self.total)
         bar = self.fill * filled_length + '-' * (self.length - filled_length)
-        print('\r{} |{}| {}% {}'.format(self.prefix, bar, percent, self.suffix),
+        print('{} |{}| {}% {}'.format(self.prefix, bar, percent, self.suffix),
               end='\r', flush=True),
 
         # Print New Line when complete
-        if batch == self.total:
-            print(flush=True)
+        if self.batch == self.total:
+            print()
