@@ -205,10 +205,10 @@ def main():
                 best_acc = accuracy
 
             # Save checkpoint
-            checkpoint_filename = './checkpoints/benchmark-{:03d}.pkl'.format(epoch)
+            checkpoint_filename = './checkpoints/benchmark-{}-{:03d}.pkl'.format(args.dataset, epoch)
             save_checkpoint(optimizer, model, epoch, checkpoint_filename)
 
-        # Give some details about how
+        # Give some details about how long the training took
         time_elapsed = time.time() - since
         print('Training complete in {:.0f}m {:.0f}s'.format(
                time_elapsed // 60, time_elapsed % 60))
@@ -230,16 +230,25 @@ def main():
     optimizer = optim.SGD(model_res.parameters(), lr=args.lr,
                              momentum=args.momentum, weight_decay=args.weight_decay)
 
+    # Load model if starting from checkpoint
+    if args.start_epoch != 1:
+        model_res = epoch = load_checkpoint(optimizer, model,
+                            './checkpoints/benchmark-{}-{:03d}.pkl'
+                            .format(args.dataset, args.start_epoch))
+        print('Resuming training from epoch', epoch)
+
     # Check if the model is just being evaluted
     if args.evaluate:
-        print('\nEvaluation only for {} epochs'.format(args.epochs))
+        print('\nEvaluation only for epoch {}'.format(args.start_epoch))
         # TODO: Create evaluation function
         #valid_losses, y_pred = test_model(model, criterion, args.epochs)
         return
 
     # Train model
-    print('\nTraining and validating model for {} epochs...'.format(args.epochs))
-    train_losses, valid_losses, y_pred = train_model(model_res, criterion, optimizer, args.epochs)
+    print('\nTraining and validating model for {} epoch{}...'
+            .format(args.epochs, "s"[args.epochs==1:]))
+    train_losses, valid_losses, y_pred = train_model(model_res, criterion,
+                                                     optimizer, args.epochs)
 
     # Visualize the training loss
     plotLoss(train_losses, valid_losses)
