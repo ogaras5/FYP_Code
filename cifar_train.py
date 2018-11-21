@@ -222,6 +222,7 @@ def main():
         model_res = DataParallel(model_res).cuda()
         cudnn.benchmark = True
     print('Total params: %.2fM' % (sum(p.numel() for p in model_res.parameters())/1000000.0))
+    model_res.to(device)
 
     # Loss function
     criterion = nn.CrossEntropyLoss()
