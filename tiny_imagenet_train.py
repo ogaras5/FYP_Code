@@ -17,6 +17,7 @@ from torchvision.datasets import ImageFolder
 
 from utils.progress import MonitorProgress
 from utils.helpers import *
+from utils.data_helpers import *
 
 import argparse
 import time
@@ -71,9 +72,14 @@ if use_cuda:
     torch.cuda.manual_seed_all(args.manualSeed)
 
 def main():
+    print("------Setup Validation Data------")
+    print("Create seperate folders for each class and place validation data in "
+          "correct classes")
+    create_val_folder('./data/tiny-imagenet-200')
+    print("Completed")
     # transforms for the training data
     train_transform = transforms.Compose([
-        transforms.RandomSizedCrop(224),
+        transforms.RandomResizedCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406],
@@ -102,9 +108,9 @@ def main():
                               shuffle=False, num_workers=args.workers)
 
     # Get list of class names, e.g. n01443537, n01629819, etc... and create dictionary
-    self.class_names = train_set.classes
-    self.num_classes = len(self.class_names)
-    self.tiny_class = class_extractor(self.class_names)
+    class_names = train_set.classes
+    num_classes = len(class_names)
+    tiny_class = class_extractor(class_names, './data/tiny-imagenet-200')
 
 if __name__ == '__main__':
     main()

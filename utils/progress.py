@@ -1,4 +1,5 @@
 from __future__ import print_function
+import sys
 
 __all__ = ['MonitorProgress']
 
@@ -33,8 +34,10 @@ class MonitorProgress(object):
         filled_length = int(self.length * self.batch // self.total)
         bar = self.fill * filled_length + '-' * (self.length - filled_length)
         print('{} |{}| {}% {}'.format(self.prefix, bar, percent, self.suffix),
-              end='\r', flush=True),
+              end='\r'),
 
         # Print New Line when complete
         if self.batch == self.total:
             print()
+
+        sys.stdout.flush()

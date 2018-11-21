@@ -3,12 +3,14 @@ Functions to help with the loading and labelling of tiny-imagenet-200
 """
 import os
 
-def create_val_folder():
+__all__ = ['create_val_folder', 'class_extractor']
+
+def create_val_folder(data_path):
     """
     Creates the correct file structure to use pyTorch ImageFolder to retrieve data
     """
-    path = os.path.join(args.data, 'val/images')
-    filename = os.path.join(args.data, 'val/val_annotations.txt')
+    path = os.path.join(data_path, 'val/images')
+    filename = os.path.join(data_path, 'val/val_annotations.txt')
     fp = open(filename, 'r')
     data = fp.readlines()
 
@@ -28,13 +30,13 @@ def create_val_folder():
         if os.path.exists(os.path.join(path,img)):
             os.rename(os.path.join(path, img), os.path.join(newpath, img))
 
-def class_extractor(class_list):
+def class_extractor(class_list, data_path):
     """
     Create a dictionary of the labels from the words.txt. This file contains
     all labels for ful ImageNet dataset, so want to return only those associated
     with tiny ImageNet
     """
-    filename = os.path.join(args.data, 'words.txt')
+    filename = os.path.join(data_path, 'words.txt')
     fp = open(filename, 'r')
     data = fp.readlines()
 
