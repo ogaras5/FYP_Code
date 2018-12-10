@@ -1,6 +1,7 @@
 from __future__ import print_function, division
 
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -50,7 +51,7 @@ parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
 # Arguments for model architecture
 parser.add_argument('--depth', type=int, default=56, help='Model depth (default: 29)')
 # Arguments for miscellaneous
-parser.add_argument('--manualSeed', type=int, help='manual seed')
+parser.add_argument('--manualSeed', type=int, default=12345 help='manual seed')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
 parser.add_argument('--gpu-id', default='0', type=str,
@@ -63,7 +64,7 @@ state = {k: v for k, v in args._get_kwargs()}
 # If there are GPUs available to use
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_id
 use_cuda = torch.cuda.is_available()
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if use_cuda else "cpu")
 
 # Generate a random seed
 if args.manualSeed is None:
@@ -251,8 +252,15 @@ def main():
     train_losses, valid_losses, y_pred = train_model(model_res, criterion,
                                                      optimizer, args.epochs)
 
-    # Visualize the training loss
-    plotLoss(train_losses, valid_losses)
+    # Save taining loss, and validation loss to a csv
+    df = pd.DataFrame({
+        'epoch': range(1, len(train_losses) + 1),
+        'train': train_losses,
+        'valid': valid_losses
+    })
+
+    # Save to csv file
+    df.to_csv("./losses/{}.csv".format(args.dataset))
 
 def adjust_learning_rate(optimizer, epoch):
     global state

@@ -8,6 +8,7 @@ print(sys.version)
 device = 'cpu'
 
 import numpy as np
+import pandas as pd
 
 import torch
 import torch.nn.functional as F
@@ -25,7 +26,7 @@ import argparse
 from utils.progress import MonitorProgress
 from utils.helpers import *
 
-parser = argparse.ArgumentParser(description='PyTorch MBIST training')
+parser = argparse.ArgumentParser(description='PyTorch MNIST training')
 parser.add_argument('--epochs', default=10, type=int, metavar='N',
                     help='Number of epochs to train')
 parser.add_argument('--start-epoch', default=1, type=int, metavar='N',
@@ -214,6 +215,16 @@ if args.start_epoch != 1:
     print('Resuming training from epoch', epoch)
 train_losses, valid_losses, y_pred = train(optimizer, model, num_epochs=args.epochs,
                                             first_epoch=args.start_epoch)
+
+# Save taining loss, and validation loss to a csv
+df = pd.DataFrame({
+    'epoch': range(1, len(train_losses) + 1),
+    'train': train_losses,
+    'valid': valid_losses
+})
+
+# Save to csv file
+df.to_csv("./losses/MNIST.csv")
 
 plotLoss(train_losses, valid_losses)
 num_errors = torch.sum((y_pred != valid_set.test_labels).float())
