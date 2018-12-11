@@ -49,9 +49,9 @@ parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
 parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
                     metavar='W', help='weight decay (default: 1e-4)')
 # Arguments for model architecture
-parser.add_argument('--depth', type=int, default=56, help='Model depth (default: 29)')
+parser.add_argument('--depth', type=int, default=56, help='Model depth (default: 56)')
 # Arguments for miscellaneous
-parser.add_argument('--manualSeed', type=int, default=12345 help='manual seed')
+parser.add_argument('--manualSeed', type=int, default=12345, help='manual seed (default: 12345)')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
 parser.add_argument('--gpu-id', default='0', type=str,
@@ -96,15 +96,15 @@ def main():
 
     # Load datasets
     if args.dataset == 'cifar10':
-        train_set = CIFAR10('./data/cifar_10', train=True,
+        train_set = CIFAR10('/data/sarah/cifar_10', train=True,
                             download=True, transform=train_transform)
-        valid_set = CIFAR10('./data/cifar_10', train=False,
+        valid_set = CIFAR10('/data/sarah/cifar_10', train=False,
                             download=True, transform=valid_transform)
         num_classes = 10
     else:
-        train_set = CIFAR100('./data/cifar_100', train=True,
+        train_set = CIFAR100('/data/sarah/cifar_100', train=True,
                              download=True, transform=train_transform)
-        valid_set = CIFAR100('./data/cifar_100', train=False,
+        valid_set = CIFAR100('/data/sarah/cifar_100', train=False,
                              download=True, transform=valid_transform)
         num_classes = 100
 
