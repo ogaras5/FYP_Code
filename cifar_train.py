@@ -206,7 +206,7 @@ def main():
                 best_acc = accuracy
 
             # Save checkpoint
-            checkpoint_filename = './checkpoints/benchmark-{}-{:03d}.pkl'.format(args.dataset, epoch)
+            checkpoint_filename = './checkpoints/{}/benchmark-{}-{:03d}.pkl'.format(args.dataset, args.dataset, epoch)
             save_checkpoint(optimizer, model, epoch, checkpoint_filename)
 
         # Give some details about how long the training took
@@ -235,8 +235,8 @@ def main():
     # Load model if starting from checkpoint
     if args.start_epoch != 1:
         model_res = epoch = load_checkpoint(optimizer, model,
-                            './checkpoints/benchmark-{}-{:03d}.pkl'
-                            .format(args.dataset, args.start_epoch))
+                            './checkpoints/{}/benchmark-{}-{:03d}.pkl'
+                            .format(args.dataset, args.dataset, args.start_epoch))
         print('Resuming training from epoch', epoch)
 
     # Check if the model is just being evaluted
@@ -259,8 +259,10 @@ def main():
         'valid': valid_losses
     })
 
+    df.set_index('epoch', inplace=True)
+
     # Save to csv file
-    df.to_csv("./losses/{}.csv".format(args.dataset))
+    df.to_csv("./losses/benchmark-{}.csv".format(args.dataset))
 
 def adjust_learning_rate(optimizer, epoch):
     global state

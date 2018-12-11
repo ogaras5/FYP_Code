@@ -223,6 +223,8 @@ df = pd.DataFrame({
     'valid': valid_losses
 })
 
+df.set_index('epoch', inplace=True)
+
 # Save to csv file
 df.to_csv("./losses/MNIST.csv")
 
