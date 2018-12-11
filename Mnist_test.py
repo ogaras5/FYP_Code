@@ -199,7 +199,7 @@ def train(optimizer, model, num_epochs=10, first_epoch=1):
             best_acc = accuracy
 
         # Save a checkpoint
-        checkpoint_filename = './checkpoints/mnist-{:03d}.pkl'.format(epoch)
+        checkpoint_filename = './checkpoints/mnist/mnist-{:03d}.pkl'.format(epoch)
         save_checkpoint(optimizer, model, epoch, checkpoint_filename)
 
     time_elapsed = time.time() - since
@@ -210,7 +210,7 @@ def train(optimizer, model, num_epochs=10, first_epoch=1):
     return train_losses, valid_losses, y_pred
 
 if args.start_epoch != 1:
-    epoch = load_checkpoint(optimizer, model, './checkpoints/mnist-{:03d}.pkl'
+    epoch = load_checkpoint(optimizer, model, './checkpoints/mnist/mnist-{:03d}.pkl'
             .format(args.start_epoch))
     print('Resuming training from epoch', epoch)
 train_losses, valid_losses, y_pred = train(optimizer, model, num_epochs=args.epochs,
