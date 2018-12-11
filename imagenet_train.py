@@ -218,7 +218,7 @@ def main():
                 best_acc = accuracy
 
             # Save checkpoint
-            checkpoint_filename = './checkpoints/{}/benchmark-{}-{:03d}.pkl'.format(args.dataset, args.dataset, epoch)
+            checkpoint_filename = './checkpoints/imagenet/benchmark-imagenet-{:03d}.pkl'.format(epoch)
             save_checkpoint(optimizer, model, epoch, checkpoint_filename)
 
         # Give some details about how long the training took
@@ -248,8 +248,8 @@ def main():
     # Load model if starting from checkpoint
     if args.start_epoch != 1:
         model_res = epoch = load_checkpoint(optimizer, model,
-                            './checkpoints/{}/benchmark-{}-{:03d}.pkl'
-                            .format(args.dataset, args.dataset, args.start_epoch))
+                            './checkpoints/imagenet/benchmark-imagenet-{:03d}.pkl'
+                            .format(args.start_epoch))
         print('Resuming training from epoch', epoch)
 
     # Check if the model is just being evaluted
