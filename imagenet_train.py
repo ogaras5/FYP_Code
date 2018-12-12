@@ -100,9 +100,11 @@ def main():
 
     # DataLoaders
     train_loader = DataLoader(train_set, batch_size=args.train_batch,
-                              shuffle=True, num_workers=args.workers)
+                              shuffle=True, num_workers=args.workers,
+                              pin_memory=True)
     valid_loader = DataLoader(valid_set, batch_size=args.valid_batch,
-                              shuffle=False, num_workers=args.workers)
+                              shuffle=False, num_workers=args.workers,
+                              pin_memory=True)
 
     # Model training
     def train_model(model, criterion, optimizer, num_epochs=10):
@@ -262,8 +264,7 @@ def main():
     # Train model
     print('\nTraining and validating model for {} epoch{}...'
             .format(args.epochs, "s"[args.epochs==1:]))
-    train_losses, train_top1s, train_top5s, valid_losses,
-    valid_top1s, valid_top5s, y_pred = train_model(model_res, criterion,
+    train_losses, train_top1s, train_top5s, valid_losses, valid_top1s, valid_top5s, y_pred = train_model(model_res, criterion,
                                                      optimizer, args.epochs)
 
     # Save taining loss, and validation loss to a csv

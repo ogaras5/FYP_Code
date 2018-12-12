@@ -2,8 +2,9 @@
 Functions to help with the loading and labelling of tiny-imagenet-200
 """
 import os
+import json
 
-__all__ = ['create_val_folder', 'class_extractor']
+__all__ = ['create_val_folder', 'class_extractor', 'create_200_class_imagenet']
 
 def create_val_folder(data_path):
     """
@@ -30,10 +31,34 @@ def create_val_folder(data_path):
         if os.path.exists(os.path.join(path,img)):
             os.rename(os.path.join(path, img), os.path.join(newpath, img))
 
+def create_200_class_imagenet(data_path, new_path):
+    """
+    Creates a version of ImageNet containing the 200 classes in tiny-imagenet-200
+    """
+    valid_path = os.path.join(data_path, 'val')
+    train_path = os.path.join(data_path, 'train')
+    categories = os.path.join(data_path, 'meta/categories.json')
+    classes = os.path.join(data_path, 'meta/tiny_class.json')
+
+    # Load json dictionary for tiny-imagenet classes and imagenet classes
+    with open(categories, 'r') as fp:
+        all_classes = json.load(fp)
+    with open(classes, 'r') as fp:
+        used_classes = json.load(fp)
+
+    new_categories = []
+    count = 0
+    for classes in all_classes:
+        if classes['id'] in used_classes:
+            count = count + 1
+            print('Id: {} in list! Classes found: {}'.format(classes['id'], count))
+            new_categories.append(classes)
+
+
 def class_extractor(class_list, data_path):
     """
     Create a dictionary of the labels from the words.txt. This file contains
-    all labels for ful ImageNet dataset, so want to return only those associated
+    all labels for full ImageNet dataset, so want to return only those associated
     with tiny ImageNet
     """
     filename = os.path.join(data_path, 'words.txt')

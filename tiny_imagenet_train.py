@@ -23,6 +23,7 @@ import argparse
 import time
 import os
 import random
+import json
 
 # Arguments for Data set
 parser = argparse.ArgumentParser(description='PyTorch Tiny ImageNet Training')
@@ -111,6 +112,10 @@ def main():
     class_names = train_set.classes
     num_classes = len(class_names)
     tiny_class = class_extractor(class_names, './data/tiny-imagenet-200')
+
+    # Save dictionary of classes in tiny imagenet
+    with open('tiny_class.json', 'w') as fp:
+        json.dump(tiny_class, fp, sort_keys=True, indent=4)
 
 if __name__ == '__main__':
     main()
