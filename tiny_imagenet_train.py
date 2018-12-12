@@ -117,5 +117,6 @@ def main():
     with open('tiny_class.json', 'w') as fp:
         json.dump(tiny_class, fp, sort_keys=True, indent=4)
 
+    create_200_class_imagenet('/data/sarah/imagenet-256', '/data/sarah/200class-imagenet-256')
 if __name__ == '__main__':
     main()

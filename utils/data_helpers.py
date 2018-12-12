@@ -2,6 +2,7 @@
 Functions to help with the loading and labelling of tiny-imagenet-200
 """
 import os
+import shutil
 import json
 
 __all__ = ['create_val_folder', 'class_extractor', 'create_200_class_imagenet']
@@ -47,13 +48,30 @@ def create_200_class_imagenet(data_path, new_path):
         used_classes = json.load(fp)
 
     new_categories = []
-    count = 0
     for classes in all_classes:
         if classes['id'] in used_classes:
-            count = count + 1
-            print('Id: {} in list! Classes found: {}'.format(classes['id'], count))
+            print('Id: {} in list!'.format(classes['id']))
             new_categories.append(classes)
+            old_valid_path = os.path.join(valid_path, classes['index'])
+            old_train_path = os.path.join(train_path, classes['index'])
+            new_valid_path = os.path.join(new_path, 'val/' + classes['index'])
+            new_train_path = os.path.join(new_path, 'train/' + classes['index'])
+            if not os.path.exists(new_valid_path):
+                os.makedirs(new_valid_path)
+            with open(old_valid_path) as fp:
+                for img in os.listdir(fp):
+                    if not os.path.exists(os.join.path(new_valid_path), img):
+                        shutil.copy(os.join.path(old_valid_path, img), os.join.path(new_valid_path, img))
+            if not os.path.exists(new_train_path):
+                os.makedirs(new_train_path)
+            with open(old_train_path) as fp:
+                for img in os.listdir(fp):
+                    if not os.path.exists(os.join.path(new_train_path), img):
+                        shutil.copy(os.join.path(old_train_path, img), os.join.path(new_train_path, img))
 
+    meta = os.path.join(new_path, 'meta/categories.json')
+    with open(meta, 'w') as fp:
+        json.dump(new_categories, fp, sort_keys=True, indent=4)
 
 def class_extractor(class_list, data_path):
     """
