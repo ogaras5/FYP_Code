@@ -124,7 +124,7 @@ def main():
         best_acc = 0.0
 
         for epoch in range(args.start_epoch, args.start_epoch + num_epochs):
-            print('Epoch: {}/{}'.format(epoch, num_epochs))
+            print('Epoch: {}/{}'.format(epoch, args.start_epoch + num_epochs - 1))
 
             # Each epoch has a training and a validation phase
             # Train Phase
@@ -234,9 +234,9 @@ def main():
 
     # Load model if starting from checkpoint
     if args.start_epoch != 1:
-        model_res = epoch = load_checkpoint(optimizer, model,
+        epoch = load_checkpoint(optimizer, model_res,
                             './checkpoints/{}/benchmark-{}-{:03d}.pkl'
-                            .format(args.dataset, args.dataset, args.start_epoch))
+                            .format(args.dataset, args.dataset, args.start_epoch-1))
         print('Resuming training from epoch', epoch)
 
     # Check if the model is just being evaluted
@@ -254,12 +254,21 @@ def main():
 
     # Save taining loss, and validation loss to a csv
     df = pd.DataFrame({
-        'epoch': range(1, len(train_losses) + 1),
+        'epoch': range(args.start_epoch, len(train_losses) + args.start_epoch),
         'train': train_losses,
         'valid': valid_losses
     })
-
     df.set_index('epoch', inplace=True)
+
+    # If starting from later epoch grab results already in csv file and make new dataframe
+    if args.start_epoch != 1:
+	old_df = pd.read_csv('./losses/benchmark-{}.csv'.format(args.dataset))
+	old_df.set_index('epoch', inplace=True)
+	df = old_df.join(df, on='epoch', how='outer', lsuffix='_df1', rsuffix='_df2')
+	df.loc[df['train_df2'].notnull(), 'train_df1'] = df.loc[df['train_df2'].notnull(), 'train_df2']
+	df.loc[df['valid_df2'].notnull(), 'valid_df1'] = df.loc[df['valid_df2'].notnull(), 'valid_df2']
+	df.drop(['train_df2', 'valid_df2'], axis=1, inplace=True)
+	df.rename(columns={'train_df1': 'train', 'valid_df1': 'valid'}, inplace=True)
 
     # Save to csv file
     df.to_csv("./losses/benchmark-{}.csv".format(args.dataset))
