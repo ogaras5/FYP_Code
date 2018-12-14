@@ -26,12 +26,12 @@ import os
 import random
 
 # Arguments for Data set
-parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
+parser = argparse.ArgumentParser(description='PyTorch 200 class ImageNet Training')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
 # Arguments for Optimization options
 parser.add_argument('--epochs', default=25, type=int, metavar='N',
-                    help='number of epochs to train')
+                    help='number of epochs to train (default: 25)')
 parser.add_argument('--start-epoch', default=1, type=int, metavar='N',
                     help='epoch to start training on (must have checkpoint saved)')
 parser.add_argument('--train-batch', default=256, type=int, metavar='N',
@@ -76,7 +76,7 @@ if use_cuda:
 def main():
     # transforms for the training data
     train_transform = transforms.Compose([
-        transforms.RandomSizedCrop(224),
+        transforms.RandomResizedCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406],
@@ -85,7 +85,7 @@ def main():
 
     # transform for the validation data
     valid_transform = transforms.Compose([
-        transforms.Scale(256),
+        transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406],
@@ -120,7 +120,7 @@ def main():
         best_acc = 0.0
 
         for epoch in range(args.start_epoch, args.start_epoch + num_epochs):
-            print('Epoch: {}/{}'.format(epoch, num_epochs))
+            print('Epoch: {}/{}'.format(epoch, args.start_epoch + num_epochs - 1))
 
             # Each epoch has a training and a validation phase
             # Train Phase
@@ -231,9 +231,11 @@ def main():
         return train_losses, train_top1s, train_top5s, valid_losses, valid_top1s,
                valid_top5s, y_pred
 
-    # Model
+    # Model with 200 class output
     print('Creating model...')
     model_res = models.resnet50()
+    num_ftrs = model_res.fc.in_features
+    model_res.fc = nn.Linear(num_ftrs, 200)
     if torch.cuda.device_count() > 1:
         model_res = DataParallel(model_res).cuda()
         cudnn.benchmark = True
@@ -251,7 +253,7 @@ def main():
     if args.start_epoch != 1:
         model_res = epoch = load_checkpoint(optimizer, model,
                             './checkpoints/imagenet/benchmark-imagenet-{:03d}.pkl'
-                            .format(args.start_epoch))
+                            .format(args.start_epoch-1))
         print('Resuming training from epoch', epoch)
 
     # Check if the model is just being evaluted
@@ -269,7 +271,7 @@ def main():
 
     # Save taining loss, and validation loss to a csv
     df = pd.DataFrame({
-        'epoch': range(1, len(train_losses) + 1),
+        'epoch': range(args.start_epoch, len(train_losses) + arrgs.start_epoch),
         'train': train_losses,
         'train_top1': train_top1s,
         'train_top5': train_top5s,
@@ -277,8 +279,21 @@ def main():
         'valid_top1': valid_top1s,
         'valid_top5': valid_top5s
     })
-
     df.set_index('epoch', inplace=True)
+
+    # If starting from later epoch grab results already in csv file and make new dataframe
+    if args.start_epoch != 1:
+    	old_df = pd.read_csv('./losses/benchmark-{}.csv'.format(args.dataset))
+    	old_df.set_index('epoch', inplace=True)
+    	df = old_df.join(df, on='epoch', how='outer', lsuffix='_df1', rsuffix='_df2')
+    	df.loc[df['train_df2'].notnull(), 'train_df1'] = df.loc[df['train_df2'].notnull(), 'train_df2']
+    	df.loc[df['valid_df2'].notnull(), 'valid_df1'] = df.loc[df['valid_df2'].notnull(), 'valid_df2']
+        df.loc[df['train_top1_df2'].notnull(), 'train_top1_df1'] = df.loc[df['train_top1_df2'].notnull(), 'train_top1_df2']
+    	df.loc[df['valid_top1_df2'].notnull(), 'valid_top1_df1'] = df.loc[df['valid_top1_df2'].notnull(), 'valid_top1_df2']
+        df.loc[df['train_top5_df2'].notnull(), 'train_top5_df1'] = df.loc[df['train_top5_df2'].notnull(), 'train_top5_df2']
+    	df.loc[df['valid_top5_df2'].notnull(), 'valid_top5_df1'] = df.loc[df['valid_top5_df2'].notnull(), 'valid_top5_df2']
+    	df.drop(['train_df2', 'train_top1_df2', 'train_top5_df2', 'valid_df2', 'valid_top1_df2', 'valid_top5_df2'], axis=1, inplace=True)
+    	df.rename(columns={'train_df1': 'train', 'train_top1_df1': 'train_top1', 'train_top5_df1': 'train_top5', 'valid_df1': 'valid', 'valid_top1_df1': 'valid_top1', 'valid_top5_df1': 'valid_top5'}, inplace=True)
 
     # Save to csv file
     df.to_csv("./losses/benchmark-imagenet.csv")
