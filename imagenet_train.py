@@ -93,9 +93,9 @@ def main():
     ])
 
     # Load datasets
-    train_set = ImageFolder('/data/sarah/imagenet/train',
+    train_set = ImageFolder('/data/sarah/200class-imagenet-256/train',
                               transform=train_transform)
-    valid_set = ImageFolder('/data/sarah/imagenet/val',
+    valid_set = ImageFolder('/data/sarah/200class-imagenet-256/val',
                               transform=valid_transform)
 
     # DataLoaders
@@ -228,8 +228,7 @@ def main():
         print('Training complete in {:.0f}m {:.0f}s'.format(
                time_elapsed // 60, time_elapsed % 60))
         print('Best value Accuracy: {:4f}%'.format(float(best_acc)*100))
-        return train_losses, train_top1s, train_top5s, valid_losses, valid_top1s,
-               valid_top5s, y_pred
+        return train_losses, train_top1s, train_top5s, valid_losses, valid_top1s, valid_top5s, y_pred
 
     # Model with 200 class output
     print('Creating model...')
