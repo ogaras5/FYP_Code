@@ -7,7 +7,8 @@ import torch
 import matplotlib.pyplot as plt
 
 __all__ = ['AverageBase', 'RunningAverage', 'MovingAverage',
-           'plotLoss', 'load_checkpoint', 'save_checkpoint']
+           'plotLoss', 'load_checkpoint', 'save_checkpoint',
+           'accuracy']
 
 class AverageBase(object):
     def __init__(self, value=0):
@@ -75,6 +76,23 @@ def save_checkpoint(optimizer, model, epoch, filename):
         'epoch' : epoch
     }
     torch.save(checkpoint_dict, filename)
+
+def accuracy(output, target, topk=(1,)):
+    """
+    Computes the prescision k for the specified values of k
+    """
+    maxk = max(topk)
+    batch_size = target.size(0)
+
+    _, pred = output.topk(maxk, 1, True, True)
+    pred = pred.t()
+    correct = pred.eq(target.view(1, -1).expand_as(pred))
+    
+    res = []
+    for k in topk:
+        correct_k = correct[:k].view(-1).float().sum(0)
+        res.append(correct_k.mul_(100.0 / batch_size))
+    return res
 
 def plotLoss(train_losses,valid_losses):
     # Visualize the Learning Curve

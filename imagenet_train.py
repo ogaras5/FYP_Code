@@ -1,6 +1,7 @@
 """
 Script to train resnet model on imagenet
 """
+from __future__ import print_function
 import numpy as np
 import pandas as pd
 import torch
@@ -34,10 +35,10 @@ parser.add_argument('--epochs', default=25, type=int, metavar='N',
                     help='number of epochs to train (default: 25)')
 parser.add_argument('--start-epoch', default=1, type=int, metavar='N',
                     help='epoch to start training on (must have checkpoint saved)')
-parser.add_argument('--train-batch', default=256, type=int, metavar='N',
-                    help='batch size for training (default: 256)')
-parser.add_argument('--valid-batch', default=200, type=int, metavar='N',
-                    help='batch size for testing (default: 200)')
+parser.add_argument('--train-batch', default=64, type=int, metavar='N',
+                    help='batch size for training (default: 64)')
+parser.add_argument('--valid-batch', default=50, type=int, metavar='N',
+                    help='batch size for testing (default: 50)')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--schedule', type=int, nargs='+', default=[30, 60],
@@ -158,7 +159,7 @@ def main():
 
                 # Update Average Loss
                 train_loss.update(loss)
-                prec1, prec5 = accuracy(predictions, targets, topk=(1,5))
+                prec1, prec5 = accuracy(predictions.data, targets.data, topk=(1,5))
                 train_top1.update(prec1)
                 train_top5.update(prec5)
 
@@ -197,7 +198,7 @@ def main():
 
                     # Update running loss value
                     valid_loss.update(loss)
-                    prec1, prec5 = accuracy(predictions, targets, topk=(1,5))
+                    prec1, prec5 = accuracy(predictions.data, targets.data, topk=(1,5))
                     valid_top1.update(prec1)
                     valid_top5.update(prec5)
 
@@ -214,10 +215,10 @@ def main():
             # Calculate validation accuracy and see if it is the best accuracy
             y_true = torch.tensor(valid_set.test_labels, dtype=torch.int64)
             y_pred = torch.tensor(y_pred, dtype=torch.int64)
-            accuracy = torch.mean((y_pred == y_true).float())
-            print('Validation accuracy: {:4f}%'.format(float(accuracy)*100))
-            if accuracy > best_acc:
-                best_acc = accuracy
+            acc = torch.mean((y_pred == y_true).float())
+            print('Validation accuracy: {:4f}%'.format(float(acc)*100))
+            if acc > best_acc:
+                best_acc = acc
 
             # Save checkpoint
             checkpoint_filename = './checkpoints/imagenet/benchmark-imagenet-{:03d}.pkl'.format(epoch)
