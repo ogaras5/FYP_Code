@@ -35,10 +35,10 @@ parser.add_argument('--epochs', default=25, type=int, metavar='N',
                     help='number of epochs to train (default: 25)')
 parser.add_argument('--start-epoch', default=1, type=int, metavar='N',
                     help='epoch to start training on (must have checkpoint saved)')
-parser.add_argument('--train-batch', default=64, type=int, metavar='N',
-                    help='batch size for training (default: 64)')
-parser.add_argument('--valid-batch', default=50, type=int, metavar='N',
-                    help='batch size for testing (default: 50)')
+parser.add_argument('--train-batch', default=32, type=int, metavar='N',
+                    help='batch size for training (default: 32)')
+parser.add_argument('--valid-batch', default=25, type=int, metavar='N',
+                    help='batch size for testing (default: 25)')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--schedule', type=int, nargs='+', default=[30, 60],
@@ -147,8 +147,8 @@ def main():
 
                 # Forward propagate
                 predictions = model(batch)
-
-                # Calculate the loss
+                
+		# Calculate the loss
                 loss = criterion(predictions, targets)
 
                 # backpropagation to compute gradients
@@ -180,7 +180,8 @@ def main():
             valid_top1 = RunningAverage()
             valid_top5 = RunningAverage()
 
-            # Keep track of predictions
+            # Keep track of predictions and actual labels
+	    y_true = []
             y_pred = []
 
             # We don't need gradients for validation, so wrap in no_grad to save memory
@@ -202,7 +203,8 @@ def main():
                     valid_top1.update(prec1)
                     valid_top5.update(prec5)
 
-                    # Save predictions
+                    # Save predictions and actual labels
+                    y_true.extend(targets.cpu().numpy())
                     y_pred.extend(predictions.argmax(dim=1).cpu().numpy())
 
             print('Validation Loss: ', valid_loss)
@@ -213,7 +215,7 @@ def main():
             valid_top5s.append(valid_top5.value)
 
             # Calculate validation accuracy and see if it is the best accuracy
-            y_true = torch.tensor(valid_set.test_labels, dtype=torch.int64)
+            y_true = torch.tensor(y_true, dtype=torch.int64)
             y_pred = torch.tensor(y_pred, dtype=torch.int64)
             acc = torch.mean((y_pred == y_true).float())
             print('Validation accuracy: {:4f}%'.format(float(acc)*100))
@@ -251,7 +253,7 @@ def main():
 
     # Load model if starting from checkpoint
     if args.start_epoch != 1:
-        model_res = epoch = load_checkpoint(optimizer, model,
+        epoch = load_checkpoint(optimizer, model_res,
                             './checkpoints/imagenet/benchmark-imagenet-{:03d}.pkl'
                             .format(args.start_epoch-1))
         print('Resuming training from epoch', epoch)
@@ -271,7 +273,7 @@ def main():
 
     # Save taining loss, and validation loss to a csv
     df = pd.DataFrame({
-        'epoch': range(args.start_epoch, len(train_losses) + arrgs.start_epoch),
+        'epoch': range(args.start_epoch, len(train_losses) + args.start_epoch),
         'train': train_losses,
         'train_top1': train_top1s,
         'train_top5': train_top5s,
@@ -283,7 +285,7 @@ def main():
 
     # If starting from later epoch grab results already in csv file and make new dataframe
     if args.start_epoch != 1:
-    	old_df = pd.read_csv('./losses/benchmark-{}.csv'.format(args.dataset))
+    	old_df = pd.read_csv('./losses/benchmark-imagenet.csv')
     	old_df.set_index('epoch', inplace=True)
     	df = old_df.join(df, on='epoch', how='outer', lsuffix='_df1', rsuffix='_df2')
     	df.loc[df['train_df2'].notnull(), 'train_df1'] = df.loc[df['train_df2'].notnull(), 'train_df2']
