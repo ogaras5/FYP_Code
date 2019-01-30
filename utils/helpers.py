@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 __all__ = ['AverageBase', 'RunningAverage', 'MovingAverage',
            'plotLoss', 'load_checkpoint', 'save_checkpoint',
-           'accuracy']
+           'accuracy', 'plotAccuracy']
 
 class AverageBase(object):
     def __init__(self, value=0):
@@ -104,5 +104,18 @@ def plotLoss(train_losses,valid_losses):
     plt.title('Learning Curve')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
+    plt.xticks(epochs)
+    plt.show()
+
+def plotAccuracy(train_accur,valid_accur,top=1):
+    # Visualize the Learning Curve
+    epochs = range(1, len(train_accur) + 1)
+    plt.figure(figsize=(10,6))
+    plt.plot(epochs, train_accur, '-o', label='Training Accuracy')
+    plt.plot(epochs, valid_accur, '-o', label='Validation Accuracy')
+    plt.legend()
+    plt.title('Top {} Accuracy of Model'.format(top))
+    plt.xlabel('Epoch')
+    plt.ylabel('% Accuracy')
     plt.xticks(epochs)
     plt.show()

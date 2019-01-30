@@ -20,3 +20,6 @@ filepath = '{}/{}-{}.csv'.format(args.filepath, args.augmentation, args.dataset)
 df = pd.read_csv(filepath)
 
 plotLoss(df['train'], df['valid'])
+if args.dataset == 'imagenet':
+    plotAccuracy(df['train_top1'], df['valid_top1'])
+    plotAccuracy(df['train_top5'], df['valid_top5'], top=5)
