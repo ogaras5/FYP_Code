@@ -53,8 +53,6 @@ parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
 parser.add_argument('--manualSeed', type=int, default=12345, help='manual seed')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
-parser.add_argument('--pretrained', dest='pretrained', action='store_true',
-                    help='use pre-trained model')
 parser.add_argument('--gpu-id', default='0', type=str,
                     help='id(s) for CUDA_VISIBLE_DEVICES')
 
@@ -245,10 +243,10 @@ def main():
         print('Training complete in {:.0f}m {:.0f}s'.format(
                time_elapsed // 60, time_elapsed % 60))
         print('Best value Accuracy: {:4f}%'.format(float(best_acc)*100))
-	    fp = open('./losses/imagenet-details.txt', 'a+')
-	    fp.write('\nResults for training benchmark:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.start_epoch, args.start_epoch + args.epochs - 1,
+	fp = open('./losses/imagenet-details.txt', 'a+')
+	fp.write('\nResults for training benchmark:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.start_epoch, args.start_epoch + args.epochs - 1,
 		          time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
-	    fp.close()
+	fp.close()
         return train_losses, train_top1s, train_top5s, valid_losses, valid_top1s, valid_top5s, y_pred
 
     # Evaluation of model
@@ -259,10 +257,16 @@ def main():
         valid_loss = RunningAverage()
         valid_top1 = RunningAverage()
         valid_top5 = RunningAverage()
+        
+        # Monitor progress
+        progress = MonitorProgress(total=len(valid_set))
 
         # Keep track of predictions
         y_pred = []
+        y_true = []
         valid_losses = []
+        valid_top1s = []
+        valid_top5s = []
 
         # We don't need gradients for validation, so wrap in no_grad to save memory
         with torch.no_grad():
@@ -282,9 +286,13 @@ def main():
                 prec1, prec5 = accuracy(predictions.data, targets.data, topk=(1,5))
                 valid_top1.update(prec1)
                 valid_top5.update(prec5)
+     
+                # Update progress bar
+                progress.update(batch.shape[0], valid_loss)
 
-                # Save predictions
+                # Save predictions and actual labels
                 y_pred.extend(predictions.argmax(dim=1).cpu().numpy())
+                y_true.extend(targets.cpu().numpy())
 
         print('Validation Loss: ', valid_loss)
         print('Validation Top1: ', valid_top1)
@@ -294,10 +302,10 @@ def main():
         valid_top5s.append(valid_top5.value)
 
         # Calculate validation accuracy and see if it is the best accuracy
-        y_true = torch.tensor(valid_set.test_labels, dtype=torch.int64)
+        y_true = torch.tensor(y_true, dtype=torch.int64)
         y_pred = torch.tensor(y_pred, dtype=torch.int64)
-        accuracy = torch.mean((y_pred == y_true).float())
-        print('Validation accuracy: {:4f}%'.format(float(accuracy)*100))
+        acc = torch.mean((y_pred == y_true).float())
+        print('Validation accuracy: {:4f}%'.format(float(acc)*100))
 	return valid_losses, valid_top1s, valid_top5s, y_pred
 
     # Model with 200 class output

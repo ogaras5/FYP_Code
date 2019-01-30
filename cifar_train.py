@@ -234,7 +234,9 @@ def main():
     def test_model(model, criterion):
         # Validation Phase
         model.eval()
-
+        
+        # Create progress bar
+        progress = MonitorProgress(total=len(valid_set))
         valid_loss = RunningAverage()
 
         # Keep track of predictions
@@ -259,6 +261,9 @@ def main():
 
                 # Save predictions
                 y_pred.extend(predictions.argmax(dim=1).cpu().numpy())
+                
+                # Update progress bar
+                progress.update(batch.shape[0], valid_loss)
 
         print('Validation Loss: ', valid_loss)
         valid_losses.append(valid_loss.value)
