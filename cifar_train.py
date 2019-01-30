@@ -208,14 +208,68 @@ def main():
             # Save checkpoint
             checkpoint_filename = './checkpoints/{}/benchmark-{}-{:03d}.pkl'.format(args.dataset, args.dataset, epoch)
             save_checkpoint(optimizer, model, epoch, checkpoint_filename)
+            
+            # Save taining loss, and validation loss to a csv
+            df = pd.DataFrame({
+                'epoch': range(args.start_epoch, len(train_losses) + args.start_epoch),
+                'train': train_losses,
+                'valid': valid_losses
+            })
+            df.set_index('epoch', inplace=True)
+            # Save to tmp csv file
+            df.to_csv("./losses/benchmark-{}-tmp.csv".format(args.dataset))
 
         # Give some details about how long the training took
         time_elapsed = time.time() - since
         print('Training complete in {:.0f}m {:.0f}s'.format(
                time_elapsed // 60, time_elapsed % 60))
         print('Best value Accuracy: {:4f}%'.format(float(best_acc)*100))
+	fp = open('./losses/{}-details.txt'.format(args.dataset), 'a+')
+	fp.write('\nResults for training benchmark:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.start_epoch, args.start_epoch + args.epochs - 1, 
+		time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
+	fp.close() 
         return train_losses, valid_losses, y_pred
+    
+    # Evaluation of model
+    def test_model(model, criterion):
+        # Validation Phase
+        model.eval()
 
+        valid_loss = RunningAverage()
+
+        # Keep track of predictions
+        y_pred = []
+        valid_losses = []
+
+        # We don't need gradients for validation, so wrap in no_grad to save memory
+        with torch.no_grad():
+            for batch, targets in valid_loader:
+                #Move the validation batch to CPU
+                batch = batch.to(device)
+                targets = targets.to(device)
+
+                # Forward Propagation
+                predictions = model(batch)
+
+                # Calculate Loss
+                loss = criterion(predictions, targets)
+  
+                # Update running loss value
+                valid_loss.update(loss)
+
+                # Save predictions
+                y_pred.extend(predictions.argmax(dim=1).cpu().numpy())
+
+        print('Validation Loss: ', valid_loss)
+        valid_losses.append(valid_loss.value)
+
+        # Calculate validation accuracy and see if it is the best accuracy
+        y_true = torch.tensor(valid_set.test_labels, dtype=torch.int64)
+        y_pred = torch.tensor(y_pred, dtype=torch.int64)
+        accuracy = torch.mean((y_pred == y_true).float())
+        print('Validation accuracy: {:4f}%'.format(float(accuracy)*100))
+	return valid_losses, y_pred
+    
     # Model
     print('Creating model...')
     model_res = models.resnet(num_classes=num_classes, depth=args.depth)
@@ -233,7 +287,7 @@ def main():
                              momentum=args.momentum, weight_decay=args.weight_decay)
 
     # Load model if starting from checkpoint
-    if args.start_epoch != 1:
+    if args.start_epoch != 1 and not args.evaluate:
         epoch = load_checkpoint(optimizer, model_res,
                             './checkpoints/{}/benchmark-{}-{:03d}.pkl'
                             .format(args.dataset, args.dataset, args.start_epoch-1))
@@ -242,8 +296,10 @@ def main():
     # Check if the model is just being evaluted
     if args.evaluate:
         print('\nEvaluation only for epoch {}'.format(args.start_epoch))
-        # TODO: Create evaluation function
-        #valid_losses, y_pred = test_model(model, criterion, args.epochs)
+        epoch = load_checkpoint(optimizer, model_res,
+				'./checkpoints/{}/benchmark-{}-{:03d}.pkl'
+				.format(args.dataset, args.dataset, args.start_epoch))
+        valid_losses, y_pred = test_model(model_res, criterion)
         return
 
     # Train model

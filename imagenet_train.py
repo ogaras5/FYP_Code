@@ -226,11 +226,29 @@ def main():
             checkpoint_filename = './checkpoints/imagenet/benchmark-imagenet-{:03d}.pkl'.format(epoch)
             save_checkpoint(optimizer, model, epoch, checkpoint_filename)
 
+            # Save taining loss, and validation loss to a csv
+            df = pd.DataFrame({
+                'epoch': range(args.start_epoch, len(train_losses) + args.start_epoch),
+                'train': train_losses,
+                'train_top1': train_top1s,
+                'train_top5': train_top5s,
+                'valid': valid_losses,
+                'valid_top1': valid_top1s,
+                'valid_top5': valid_top5s
+            })
+            df.set_index('epoch', inplace=True)
+            # Save to tmp csv file
+            df.to_csv("./losses/benchmark-imagenet-tmp.csv")
+
         # Give some details about how long the training took
         time_elapsed = time.time() - since
         print('Training complete in {:.0f}m {:.0f}s'.format(
                time_elapsed // 60, time_elapsed % 60))
         print('Best value Accuracy: {:4f}%'.format(float(best_acc)*100))
+	fp = open('./losses/imagenet-details.txt', 'a+')
+	fp.write('\nResults for training benchmark:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.start_epoch, args.start_epoch + args.epochs - 1, 
+		time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
+	fp.close() 
         return train_losses, train_top1s, train_top5s, valid_losses, valid_top1s, valid_top5s, y_pred
 
     # Model with 200 class output
