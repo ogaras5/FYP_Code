@@ -12,7 +12,7 @@ import torchvision.transforms as transforms
 import Augmentor
 import model.resnet_cifar as models
 
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, ConcatDataset
 from torch.nn import DataParallel
 from torchvision.datasets import CIFAR10, CIFAR100
 
@@ -56,7 +56,7 @@ parser.add_argument('--augmentation', type=str, default='rotation',
                     help='Type of augmentation to apply to the dataset')
 parser.add_argument('--value', type=int, default=25,
                     help='Value to use in augmentation')
-parser.add_argument('--probability', type=float, default=0.5,
+parser.add_argument('--probability', type=float, default=1.0,
                     help='Probability that the augmentation is applied to the image')
 # Arguments for miscellaneous
 parser.add_argument('--manualSeed', type=int, default=12345, help='manual seed (default: 12345)')
@@ -92,11 +92,19 @@ def main():
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        p.torch_transform(),
         transforms.Normalize([0.4914, 0.4822, 0.4465],
                              [0.2023, 0.1994, 0.2010]),
-        ])
+    ])
 
+    train_transform_2 = transforms.Compose([
+        transforms.RandomCrop(32, padding=4),
+        transforms.RandomHorizontalFlip(),
+        p.torch_transform(),
+        transforms.ToTensor(),
+        transforms.Normalize([0.4914, 0.4822, 0.4465],
+                             [0.2023, 0.1994, 0.2010]),
+    ])
+    
     # transform for the validation data
     valid_transform = transforms.Compose([
         transforms.ToTensor(),
@@ -111,15 +119,20 @@ def main():
     if args.dataset == 'cifar10':
         train_set = CIFAR10('/data/sarah/cifar_10', train=True,
                             download=True, transform=train_transform)
+        augmented_set = CIFAR10('/data/sarah/cifar_10', train=True,
+                            download=True, transform=train_transform_2)
         valid_set = CIFAR10('/data/sarah/cifar_10', train=False,
                             download=True, transform=valid_transform)
         num_classes = 10
     else:
         train_set = CIFAR100('/data/sarah/cifar_100', train=True,
                              download=True, transform=train_transform)
+        augmented_set = CIFAR100('/data/sarah/cifar_100', train=True,
+                             download=True, transform=train_transform_2)
         valid_set = CIFAR100('/data/sarah/cifar_100', train=False,
                              download=True, transform=valid_transform)
         num_classes = 100
+    train_set = ConcatDataset((train_set, augmented_set))
 
     # DataLoaders
     train_loader = DataLoader(train_set, batch_size=args.train_batch,
@@ -231,17 +244,25 @@ def main():
             df.set_index('epoch', inplace=True)
             # Save to tmp csv file
             df.to_csv("./losses/{}-{}-tmp.csv".format(args.augmentation, args.dataset))
+            
+            # Save details about time of training to tmp file
+            time_elapsed = time.time() - since
+            fp = open('./losses/{}-details-tmp.txt'.format(args.dataset), 'w+')
+            fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
+                    args.start_epoch, args.start_epoch + epoch - 1,
+    	            time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
+            fp.close()
 
         # Give some details about how long the training took
         time_elapsed = time.time() - since
         print('Training complete in {:.0f}m {:.0f}s'.format(
                time_elapsed // 60, time_elapsed % 60))
         print('Best value Accuracy: {:4f}%'.format(float(best_acc)*100))
-	fp = open('./losses/{}-details.txt'.format(args.dataset), 'a+')
-	fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
+        fp = open('./losses/{}-details.txt'.format(args.dataset), 'a+')
+        fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
                     args.start_epoch, args.start_epoch + args.epochs - 1,
     	            time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
-	fp.close()
+        fp.close()
         return train_losses, valid_losses, y_pred
 
     # Evaluation of model
@@ -287,7 +308,7 @@ def main():
         y_pred = torch.tensor(y_pred, dtype=torch.int64)
         accuracy = torch.mean((y_pred == y_true).float())
         print('Validation accuracy: {:4f}%'.format(float(accuracy)*100))
-	return valid_losses, y_pred
+        return valid_losses, y_pred
 
     # Model
     print('Creating model...')
@@ -337,13 +358,13 @@ def main():
 
     # If starting from later epoch grab results already in csv file and make new dataframe
     if args.start_epoch != 1:
-	old_df = pd.read_csv('./losses/{}-{}.csv'.format(args.augmentation, args.dataset))
-	old_df.set_index('epoch', inplace=True)
-	df = old_df.join(df, on='epoch', how='outer', lsuffix='_df1', rsuffix='_df2')
-	df.loc[df['train_df2'].notnull(), 'train_df1'] = df.loc[df['train_df2'].notnull(), 'train_df2']
-	df.loc[df['valid_df2'].notnull(), 'valid_df1'] = df.loc[df['valid_df2'].notnull(), 'valid_df2']
-	df.drop(['train_df2', 'valid_df2'], axis=1, inplace=True)
-	df.rename(columns={'train_df1': 'train', 'valid_df1': 'valid'}, inplace=True)
+        old_df = pd.read_csv('./losses/{}-{}.csv'.format(args.augmentation, args.dataset))
+        old_df.set_index('epoch', inplace=True)
+        df = old_df.join(df, on='epoch', how='outer', lsuffix='_df1', rsuffix='_df2')
+        df.loc[df['train_df2'].notnull(), 'train_df1'] = df.loc[df['train_df2'].notnull(), 'train_df2']
+        df.loc[df['valid_df2'].notnull(), 'valid_df1'] = df.loc[df['valid_df2'].notnull(), 'valid_df2']
+        df.drop(['train_df2', 'valid_df2'], axis=1, inplace=True)
+        df.rename(columns={'train_df1': 'train', 'valid_df1': 'valid'}, inplace=True)
 
     # Save to csv file
     df.to_csv("./losses/{}-{}.csv".format(args.augmentation, args.dataset))
