@@ -9,6 +9,7 @@ import torch.cuda
 import torch.backends.cudnn as cudnn
 
 import torchvision.transforms as transforms
+import Augmentor
 import model.resnet_cifar as models
 
 from torch.utils.data import DataLoader
@@ -53,7 +54,7 @@ parser.add_argument('--depth', type=int, default=56, help='Model depth (default:
 # Arguments for augmentation
 parser.add_argument('--augmentation', type=str, default='rotation',
                     help='Type of augmentation to apply to the dataset')
-parser.add_argument('--value', type=int, default=90,
+parser.add_argument('--value', type=int, default=25,
                     help='Value to use in augmentation')
 parser.add_arguments('--probability', type=float, default=0.5,
                     help='Probability that the augmentation is applied to the image')
@@ -82,11 +83,16 @@ if use_cuda:
     torch.cuda.manual_seed_all(args.manualSeed)
 
 def main():
+    # Add augmentation
+    p = Augmentor.Pipeline()
+    p.rotate(probability=args.probability, max_left_rotation=args.value, max_right_rotation=args.value)
+
     # transforms for the training data
     train_transform = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
+        p.torch_transform(),
         transforms.Normalize([0.4914, 0.4822, 0.4465],
                              [0.2023, 0.1994, 0.2010]),
         ])
@@ -213,15 +219,75 @@ def main():
                 best_acc = accuracy
 
             # Save checkpoint
-            checkpoint_filename = './checkpoints/{}/benchmark-{}-{:03d}.pkl'.format(args.dataset, args.dataset, epoch)
+            checkpoint_filename = './checkpoints/{}/{}-{}-{:03d}.pkl'.format(args.dataset, args.augmentation, args.dataset, epoch)
             save_checkpoint(optimizer, model, epoch, checkpoint_filename)
+
+            # Save taining loss, and validation loss to a csv
+            df = pd.DataFrame({
+                'epoch': range(args.start_epoch, len(train_losses) + args.start_epoch),
+                'train': train_losses,
+                'valid': valid_losses
+            })
+            df.set_index('epoch', inplace=True)
+            # Save to tmp csv file
+            df.to_csv("./losses/{}-{}-tmp.csv".format(args.augmentation, args.dataset))
 
         # Give some details about how long the training took
         time_elapsed = time.time() - since
         print('Training complete in {:.0f}m {:.0f}s'.format(
                time_elapsed // 60, time_elapsed % 60))
         print('Best value Accuracy: {:4f}%'.format(float(best_acc)*100))
+	    fp = open('./losses/{}-details.txt'.format(args.dataset), 'a+')
+	    fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
+                    args.start_epoch, args.start_epoch + args.epochs - 1,
+    	            time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
+	    fp.close()
         return train_losses, valid_losses, y_pred
+
+    # Evaluation of model
+    def test_model(model, criterion):
+        # Validation Phase
+        model.eval()
+
+        # Create progress bar
+        progress = MonitorProgress(total=len(valid_set))
+        valid_loss = RunningAverage()
+
+        # Keep track of predictions
+        y_pred = []
+        valid_losses = []
+
+        # We don't need gradients for validation, so wrap in no_grad to save memory
+        with torch.no_grad():
+            for batch, targets in valid_loader:
+                #Move the validation batch to CPU
+                batch = batch.to(device)
+                targets = targets.to(device)
+
+                # Forward Propagation
+                predictions = model(batch)
+
+                # Calculate Loss
+                loss = criterion(predictions, targets)
+
+                # Update running loss value
+                valid_loss.update(loss)
+
+                # Save predictions
+                y_pred.extend(predictions.argmax(dim=1).cpu().numpy())
+
+                # Update progress bar
+                progress.update(batch.shape[0], valid_loss)
+
+        print('Validation Loss: ', valid_loss)
+        valid_losses.append(valid_loss.value)
+
+        # Calculate validation accuracy and see if it is the best accuracy
+        y_true = torch.tensor(valid_set.test_labels, dtype=torch.int64)
+        y_pred = torch.tensor(y_pred, dtype=torch.int64)
+        accuracy = torch.mean((y_pred == y_true).float())
+        print('Validation accuracy: {:4f}%'.format(float(accuracy)*100))
+	return valid_losses, y_pred
 
     # Model
     print('Creating model...')
@@ -240,17 +306,19 @@ def main():
                              momentum=args.momentum, weight_decay=args.weight_decay)
 
     # Load model if starting from checkpoint
-    if args.start_epoch != 1:
+    if args.start_epoch != 1 and not args.evaluate:
         epoch = load_checkpoint(optimizer, model_res,
-                            './checkpoints/{}/benchmark-{}-{:03d}.pkl'
-                            .format(args.dataset, args.dataset, args.start_epoch-1))
+                            './checkpoints/{}/{}-{}-{:03d}.pkl'
+                            .format(args.dataset, args.augmentation, args.dataset, args.start_epoch-1))
         print('Resuming training from epoch', epoch)
 
     # Check if the model is just being evaluted
     if args.evaluate:
         print('\nEvaluation only for epoch {}'.format(args.start_epoch))
-        # TODO: Create evaluation function
-        #valid_losses, y_pred = test_model(model, criterion, args.epochs)
+        epoch = load_checkpoint(optimizer, model_res,
+				'./checkpoints/{}/{}-{}-{:03d}.pkl'
+				.format(args.dataset, args.augmentation, args.dataset, args.start_epoch))
+        valid_losses, y_pred = test_model(model_res, criterion)
         return
 
     # Train model
@@ -269,7 +337,7 @@ def main():
 
     # If starting from later epoch grab results already in csv file and make new dataframe
     if args.start_epoch != 1:
-	old_df = pd.read_csv('./losses/benchmark-{}.csv'.format(args.dataset))
+	old_df = pd.read_csv('./losses/{}-{}.csv'.format(args.augmentation, args.dataset))
 	old_df.set_index('epoch', inplace=True)
 	df = old_df.join(df, on='epoch', how='outer', lsuffix='_df1', rsuffix='_df2')
 	df.loc[df['train_df2'].notnull(), 'train_df1'] = df.loc[df['train_df2'].notnull(), 'train_df2']
@@ -278,7 +346,7 @@ def main():
 	df.rename(columns={'train_df1': 'train', 'valid_df1': 'valid'}, inplace=True)
 
     # Save to csv file
-    df.to_csv("./losses/benchmark-{}.csv".format(args.dataset))
+    df.to_csv("./losses/{}-{}.csv".format(args.augmentation, args.dataset))
 
 def adjust_learning_rate(optimizer, epoch):
     global state
