@@ -56,7 +56,7 @@ parser.add_argument('--augmentation', type=str, default='rotation',
                     help='Type of augmentation to apply to the dataset')
 parser.add_argument('--value', type=int, default=25,
                     help='Value to use in augmentation')
-parser.add_arguments('--probability', type=float, default=0.5,
+parser.add_argument('--probability', type=float, default=0.5,
                     help='Probability that the augmentation is applied to the image')
 # Arguments for miscellaneous
 parser.add_argument('--manualSeed', type=int, default=12345, help='manual seed (default: 12345)')
@@ -237,11 +237,11 @@ def main():
         print('Training complete in {:.0f}m {:.0f}s'.format(
                time_elapsed // 60, time_elapsed % 60))
         print('Best value Accuracy: {:4f}%'.format(float(best_acc)*100))
-	    fp = open('./losses/{}-details.txt'.format(args.dataset), 'a+')
-	    fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
+	fp = open('./losses/{}-details.txt'.format(args.dataset), 'a+')
+	fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
                     args.start_epoch, args.start_epoch + args.epochs - 1,
     	            time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
-	    fp.close()
+	fp.close()
         return train_losses, valid_losses, y_pred
 
     # Evaluation of model
