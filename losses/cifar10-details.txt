@@ -9,3 +9,7 @@ Results for training rotation:
  Start epoch 1, End epoch 30, Training time 87m 12s, Best Validation accuracy 87.849998%
 Results for training rotation:
  Start epoch 30, End epoch 163, Training time 404m 49s, Best Validation accuracy 94.639999%
+Results for training skew:
+ Start epoch 1, End epoch 1, Training time 2m 55s, Best Validation accuracy 25.350001%
+Results for training skew:
+ Start epoch 1, End epoch 30, Training time 86m 19s, Best Validation accuracy 86.949998%
