@@ -249,7 +249,7 @@ def main():
             time_elapsed = time.time() - since
             fp = open('./losses/{}-details-tmp.txt'.format(args.dataset), 'w+')
             fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
-                    args.start_epoch, args.start_epoch + epoch - 1,
+                    args.start_epoch, epoch,
     	            time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
             fp.close()
 
