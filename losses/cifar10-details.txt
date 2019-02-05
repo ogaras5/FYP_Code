@@ -19,3 +19,5 @@ Results for training rotation2:
  Start epoch 1, End epoch 163, Training time 258m 45s, Best Validation accuracy 92.479998%
 Results for training erase:
  Start epoch 1, End epoch 30, Training time 92m 1s, Best Validation accuracy 87.889999%
+Results for training erase:
+ Start epoch 31, End epoch 163, Training time 401m 39s, Best Validation accuracy 94.999999%
