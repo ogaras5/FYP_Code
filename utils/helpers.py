@@ -87,35 +87,39 @@ def accuracy(output, target, topk=(1,)):
     _, pred = output.topk(maxk, 1, True, True)
     pred = pred.t()
     correct = pred.eq(target.view(1, -1).expand_as(pred))
-    
+
     res = []
     for k in topk:
         correct_k = correct[:k].view(-1).float().sum(0)
         res.append(correct_k.mul_(100.0 / batch_size))
     return res
 
-def plotLoss(train_losses,valid_losses):
+def plotLoss(train_losses, valid_losses, title=""):
     # Visualize the Learning Curve
     epochs = range(1, len(train_losses) + 1)
     plt.figure(figsize=(10,6))
     plt.plot(epochs, train_losses, '-o', label='Training loss')
     plt.plot(epochs, valid_losses, '-o', label='Validation loss')
     plt.legend()
-    plt.title('Learning Curve')
+    plt.title('Learning Curve {}'.format(title))
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
+    plt.xlim(1, len(train_losses) + 1)
+    plt.ylim(0, max(max(valid_losses), max(train_losses)))
     plt.xticks(epochs)
     plt.show()
 
-def plotAccuracy(train_accur,valid_accur,top=1):
+def plotAccuracy(train_accur, valid_accur, top=1, title=""):
     # Visualize the Learning Curve
     epochs = range(1, len(train_accur) + 1)
     plt.figure(figsize=(10,6))
     plt.plot(epochs, train_accur, '-o', label='Training Accuracy')
     plt.plot(epochs, valid_accur, '-o', label='Validation Accuracy')
     plt.legend()
-    plt.title('Top {} Accuracy of Model'.format(top))
+    plt.title('Top {} Accuracy of Model {}'.format(top, title))
     plt.xlabel('Epoch')
     plt.ylabel('% Accuracy')
+    plt.xlim(1, len(train_accur) + 1)
+    plt.ylim(0, 100)
     plt.xticks(epochs)
     plt.show()
