@@ -31,3 +31,11 @@ Results for pretrained training erase:
  Start epoch 30, End epoch 162, Training time 598m 46s, Best Validation accuracy 95.050001%
 Results for training distortion2:
  Start epoch 1, End epoch 163, Training time 646m 22s, Best Validation accuracy 93.349999%
+Results for pretrained training rotation3:
+ Start epoch 90, End epoch 163, Training time 118m 25s, Best Validation accuracy 93.709999%
+Results for pretrained training rotation4:
+ Start epoch 60, End epoch 163, Training time 166m 17s, Best Validation accuracy 94.389999%
+Results for pretrained training erase4:
+ Start epoch 90, End epoch 163, Training time 256m 60s, Best Validation accuracy 94.300002%
+Results for pretrained training erase3:
+ Start epoch 60, End epoch 163, Training time 305m 3s, Best Validation accuracy 94.559997%
