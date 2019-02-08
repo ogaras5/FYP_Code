@@ -4,11 +4,12 @@ and monitoring
 """
 from __future__ import absolute_import, print_function
 import torch
+import numpy as np
 import matplotlib.pyplot as plt
 
 __all__ = ['AverageBase', 'RunningAverage', 'MovingAverage',
            'plotLoss', 'load_checkpoint', 'save_checkpoint',
-           'accuracy', 'plotAccuracy']
+           'accuracy', 'plotAccuracy', 'plotLosses']
 
 class AverageBase(object):
     def __init__(self, value=0):
@@ -106,7 +107,7 @@ def plotLoss(train_losses, valid_losses, title=""):
     plt.ylabel('Loss')
     plt.xlim(1, len(train_losses) + 1)
     plt.ylim(0, max(max(valid_losses), max(train_losses)))
-    plt.xticks(epochs)
+    plt.xticks(np.arange(1, max(epochs), step=10))
     plt.show()
 
 def plotAccuracy(train_accur, valid_accur, top=1, title=""):
@@ -121,5 +122,46 @@ def plotAccuracy(train_accur, valid_accur, top=1, title=""):
     plt.ylabel('% Accuracy')
     plt.xlim(1, len(train_accur) + 1)
     plt.ylim(0, 100)
-    plt.xticks(epochs)
+    plt.xticks(np.arange(1, max(epochs), step=10))
+    plt.show()
+
+def plotLosses(train_losses, valid_losses, augmentations, title=""):
+    # Visualize the learning curve for trainnig losses
+    plt.figure(figsize=(10,6))
+    max_y = 0
+    max_x = 0
+    for i, loss in enumerate(train_losses):
+        epochs = range(1, len(loss) + 1)
+        plt.plot(epochs, loss, '-o', label='{}'.format(augmentations[i]))
+        if max(loss) > max_y:
+            max_y = max(loss)
+        if max(epochs) > max_x:
+            max_x = max(epochs)
+    plt.legend()
+    plt.title('Learning Curve for Training {}'.format(title))
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.xlim(1, max_x)
+    plt.ylim(0, max_y)
+    plt.xticks(np.arange(1, max(epochs), step=10))
+    plt.show()
+
+    # Visualize the learning curve for validation losses
+    plt.figure(figsize=(10,6))
+    max_y = 0
+    max_x = 0
+    for i, loss in enumerate(valid_losses):
+        epochs = range(1, len(loss) + 1)
+        plt.plot(epochs, loss, '-o', label='{}'.format(augmentations[i]))
+        if max(loss) > max_y:
+            max_y = max(loss)
+        if max(epochs) > max_x:
+            max_x = max(epochs)
+    plt.legend()
+    plt.title('Learning Curve for Validation {}'.format(title))
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.xlim(1, max_x)
+    plt.ylim(0, max_y)
+    plt.xticks(np.arange(1, max(epochs), step=10))
     plt.show()
