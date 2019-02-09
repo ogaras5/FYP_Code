@@ -41,3 +41,5 @@ Results for pretrained training erase3:
  Start epoch 60, End epoch 163, Training time 305m 3s, Best Validation accuracy 94.559997%
 Results for training shear:
  Start epoch 1, End epoch 30, Training time 89m 57s, Best Validation accuracy 88.499999%
+Results for training shear:
+ Start epoch 31, End epoch 163, Training time 394m 26s, Best Validation accuracy 94.880003%
