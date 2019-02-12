@@ -43,3 +43,5 @@ Results for training shear:
  Start epoch 1, End epoch 30, Training time 89m 57s, Best Validation accuracy 88.499999%
 Results for training shear:
  Start epoch 31, End epoch 163, Training time 394m 26s, Best Validation accuracy 94.880003%
+Results for pretrained training gaussianDistortion:
+ Start epoch 31, End epoch 163, Training time 1500m 41s, Best Validation accuracy 94.050002%
