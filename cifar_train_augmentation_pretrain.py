@@ -34,7 +34,7 @@ parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
 # Arguments for Optimization options
 parser.add_argument('--epochs', default=25, type=int, metavar='N',
                     help='number of epochs to train')
-parser.add_argument('--start-epoch', default=1, type=int, metavar='N',
+parser.add_argument('--start-epoch', default=31, type=int, metavar='N',
                     help='epoch to start training on (must have checkpoint saved)')
 parser.add_argument('--train-batch', default=128, type=int, metavar='N',
                     help='batch size for training (default: 128)')
@@ -234,7 +234,7 @@ def main():
                 best_acc = accuracy
 
             # Save checkpoint
-            checkpoint_filename = './checkpoints/{}/{}-{}-{:03d}.pkl'.format(args.dataset, args.augmentation, args.dataset, epoch)
+            checkpoint_filename = './checkpoints/{}/pretrain/{}/{}-{}-{:03d}.pkl'.format(args.dataset, ''.join(filter(lambda x: x.isalpha(), args.augmentation)), args.augmentation, args.dataset, epoch)
             save_checkpoint(optimizer, model, epoch, checkpoint_filename)
 
             # Save taining loss, and validation loss to a csv
@@ -245,12 +245,12 @@ def main():
             })
             df.set_index('epoch', inplace=True)
             # Save to tmp csv file
-            df.to_csv("./losses/{}-{}-tmp.csv".format(args.augmentation, args.dataset))
+            df.to_csv("./losses/{}-{}-pretrain-tmp.csv".format(args.augmentation, args.dataset))
             
             # Save details about time of training to tmp file
             time_elapsed = time.time() - since
             fp = open('./losses/{}-details-tmp.txt'.format(args.dataset), 'w+')
-            fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
+            fp.write('\nResults for pretrained training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
                     args.start_epoch, epoch,
     	            time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
             fp.close()
@@ -261,56 +261,11 @@ def main():
                time_elapsed // 60, time_elapsed % 60))
         print('Best value Accuracy: {:4f}%'.format(float(best_acc)*100))
         fp = open('./losses/{}-details.txt'.format(args.dataset), 'a+')
-        fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
+        fp.write('\nResults for pretrained training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
                     args.start_epoch, args.start_epoch + args.epochs - 1,
     	            time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
         fp.close()
         return train_losses, valid_losses, y_pred
-
-    # Evaluation of model
-    def test_model(model, criterion):
-        # Validation Phase
-        model.eval()
-
-        # Create progress bar
-        progress = MonitorProgress(total=len(valid_set))
-        valid_loss = RunningAverage()
-
-        # Keep track of predictions
-        y_pred = []
-        valid_losses = []
-
-        # We don't need gradients for validation, so wrap in no_grad to save memory
-        with torch.no_grad():
-            for batch, targets in valid_loader:
-                #Move the validation batch to CPU
-                batch = batch.to(device)
-                targets = targets.to(device)
-
-                # Forward Propagation
-                predictions = model(batch)
-
-                # Calculate Loss
-                loss = criterion(predictions, targets)
-
-                # Update running loss value
-                valid_loss.update(loss)
-
-                # Save predictions
-                y_pred.extend(predictions.argmax(dim=1).cpu().numpy())
-
-                # Update progress bar
-                progress.update(batch.shape[0], valid_loss)
-
-        print('Validation Loss: ', valid_loss)
-        valid_losses.append(valid_loss.value)
-
-        # Calculate validation accuracy and see if it is the best accuracy
-        y_true = torch.tensor(valid_set.test_labels, dtype=torch.int64)
-        y_pred = torch.tensor(y_pred, dtype=torch.int64)
-        accuracy = torch.mean((y_pred == y_true).float())
-        print('Validation accuracy: {:4f}%'.format(float(accuracy)*100))
-        return valid_losses, y_pred
 
     # Model
     print('Creating model...')
@@ -331,18 +286,9 @@ def main():
     # Load model if starting from checkpoint
     if args.start_epoch != 1 and not args.evaluate:
         epoch = load_checkpoint(optimizer, model_res,
-                            './checkpoints/{}/{}-{}-{:03d}.pkl'
-                            .format(args.dataset, args.augmentation, args.dataset, args.start_epoch-1))
+                            './checkpoints/{}/benchmark-{}-{:03d}.pkl'
+                            .format(args.dataset, args.dataset, args.start_epoch-1))
         print('Resuming training from epoch', epoch)
-
-    # Check if the model is just being evaluted
-    if args.evaluate:
-        print('\nEvaluation only for epoch {}'.format(args.start_epoch))
-        epoch = load_checkpoint(optimizer, model_res,
-				'./checkpoints/{}/{}-{}-{:03d}.pkl'
-				.format(args.dataset, args.augmentation, args.dataset, args.start_epoch))
-        valid_losses, y_pred = test_model(model_res, criterion)
-        return
 
     # Train model
     print('\nTraining and validating model for {} epoch{}...'
@@ -360,7 +306,7 @@ def main():
 
     # If starting from later epoch grab results already in csv file and make new dataframe
     if args.start_epoch != 1:
-        old_df = pd.read_csv('./losses/{}-{}.csv'.format(args.augmentation, args.dataset))
+        old_df = pd.read_csv('./losses/benchmark-{}.csv'.format(args.dataset))
         old_df.set_index('epoch', inplace=True)
         df = old_df.join(df, on='epoch', how='outer', lsuffix='_df1', rsuffix='_df2')
         df.loc[df['train_df2'].notnull(), 'train_df1'] = df.loc[df['train_df2'].notnull(), 'train_df2']
@@ -369,7 +315,7 @@ def main():
         df.rename(columns={'train_df1': 'train', 'valid_df1': 'valid'}, inplace=True)
 
     # Save to csv file
-    df.to_csv("./losses/{}-{}.csv".format(args.augmentation, args.dataset))
+    df.to_csv("./losses/{}-{}-pretrain.csv".format(args.augmentation, args.dataset))
 
 def adjust_learning_rate(optimizer, epoch):
     global state
