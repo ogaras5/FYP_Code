@@ -110,33 +110,54 @@ def create_augmentation_pipeline(augmentations, prob=1, max_right=25,
     """
     Create a pipeline to add given augmentation with given parameters
     """
+    # Create empty pipeline
+    p = Augmentor.Pipeline()
+    # Check if single augmentation or list of augmentation passed to function
+    if isinstance(augmentations, (list, tuple)):
+        for augment in augmentations:
+            add_augmentation(p, augment, prob=prob, max_right=max_right,
+                            max_left=max_left, mag=mag)
+    else:
+        add_augmentation(p, augmentations, prob=prob, max_right=max_right,
+                        max_left=max_left, mag=mag)
+    return p
+
+def add_augmentation(p, augment, **kwargs):
+    """
+    Function to add a given augmentation to the pipeline with the passed arguments
+    """
+    # Grab list of optional arguments for augmentations
+    args = {k: v for k, v in kwargs.items()}
+    # List of all allowed augmentations
     possible_augments = ['rotation', 'erase', 'skew', 'shear', 'distortion',
                         'gaussianDistortion']
-    p = Augmentor.Pipeline()
-    for augment in augmentations:
-        augment = ''.join(filter(lambda x: x.isalpha(), augment))
-        if augment in possible_augments:
-            if augment == 'rotation':
-                print('Adding rotation to pipeline')
-                p.rotate(probability=prob, max_left_rotation=max_left, max_right_rotation=max_right)
-            if augment == 'skew':
-                print('Adding skew tilt to pipeline')
-                p.skew_tilt(probability=prob, magnitude=mag)
-            if augment == 'shear':
-                print('Adding shear to pipeline')
-                p.shear(probability=prob, max_shear_left=max_left, max_shear_right=max_right)
-            if augment == 'distortion':
-                print('Adding distortion to pipeline')
-                p.random_distortion(probability=prob, grid_width=6, grid_height=6, magnitude=5)
-            if augment == 'gaussianDistortion':
-                print('Adding gaussian distortion to pipeline')
-                p.gaussian_distortion(probability=prob, grid_width=6, grid_height=6, magnitude=5,
-                                    corner="bell", method="in", mex=0.5, mey=0.5, sdx=0.05, sdy=0.05)
-            if augment == 'erase':
-                print('Adding random erasing to pipeline')
-                p.random_erasing(probability=prob, rectangle_area=mag)
-        else:
-            raise ValueError('The augmentation {} is invalid. Possible\
-                augmentations are (augmentations can be followed by digits):\n{}'
-            .format(augment, possible_augments))
+    # Filter out any numbers from the augmentation name passed to ensure it can
+    # be found
+    augment = ''.join(filter(lambda x: x.isalpha(), augment))
+    if augment in possible_augments:
+        if augment == 'rotation':
+            print('Adding rotation to pipeline')
+            p.rotate(probability=args['prob'], max_left_rotation=args['max_left'],
+                    max_right_rotation=args['max_right'])
+        if augment == 'skew':
+            print('Adding skew tilt to pipeline')
+            p.skew_tilt(probability=args['prob'], magnitude=args['mag'])
+        if augment == 'shear':
+            print('Adding shear to pipeline')
+            p.shear(probability=args['prob'], max_shear_left=args['max_left'],
+                    max_shear_right=args['max_right'])
+        if augment == 'distortion':
+            print('Adding distortion to pipeline')
+            p.random_distortion(probability=args['prob'], grid_width=6, grid_height=6, magnitude=5)
+        if augment == 'gaussianDistortion':
+            print('Adding gaussian distortion to pipeline')
+            p.gaussian_distortion(probability=args['prob'], grid_width=6, grid_height=6, magnitude=5,
+                                corner="bell", method="in", mex=0.5, mey=0.5, sdx=0.05, sdy=0.05)
+        if augment == 'erase':
+            print('Adding random erasing to pipeline')
+            p.random_erasing(probability=args['prob'], rectangle_area=args['mag'])
+    else:
+        raise ValueError('The augmentation {} is invalid. Possible augmentations\
+ are (augmentations can be followed by digits):\n{}'
+        .format(augment, possible_augments))
     return p
