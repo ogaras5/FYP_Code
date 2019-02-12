@@ -1,11 +1,14 @@
 """
 Functions to help with the loading and labelling of tiny-imagenet-200
+Also includes any functions relating to the loading of data
 """
 import os
 import shutil
 import json
+import Augmentor
 
-__all__ = ['create_val_folder', 'class_extractor', 'create_200_class_imagenet']
+__all__ = ['create_val_folder', 'class_extractor', 'create_200_class_imagenet',
+           'create_augmentation_pipeline']
 
 def create_val_folder(data_path):
     """
@@ -58,21 +61,21 @@ def create_200_class_imagenet(data_path, new_path):
             new_train_path = os.path.join(new_path, 'train/' + str(classes['index']))
             if not os.path.exists(new_valid_path):
                 os.makedirs(new_valid_path)
-	    for img in os.listdir(old_valid_path):
-		if not os.path.exists(os.path.join(new_valid_path, img)):
-            		shutil.copy(os.path.join(old_valid_path, img), new_valid_path)
+            for img in os.listdir(old_valid_path):
+                if not os.path.exists(os.path.join(new_valid_path, img)):
+                    shutil.copy(os.path.join(old_valid_path, img), new_valid_path)
             if not os.path.exists(new_train_path):
                 os.makedirs(new_train_path)
             for img in os.listdir(old_train_path):
             	if not os.path.exists(os.path.join(new_train_path, img)):
-			shutil.copy(os.path.join(old_train_path, img), new_train_path)
+                    shutil.copy(os.path.join(old_train_path, img), new_train_path)
 
     meta_path = os.path.join(new_path, 'meta')
     if not os.path.exists(meta_path):
-	os.makedirs(meta_path)
+	    os.makedirs(meta_path)
     meta_path = os.path.join(meta_path, 'categories.json')
     with open(meta_path, 'w') as fp:
-	json.dump(new_categories, fp, indent=4)
+	    json.dump(new_categories, fp, indent=4)
 
 def class_extractor(class_list, data_path):
     """
@@ -101,3 +104,39 @@ def class_extractor(class_list, data_path):
                 continue
 
     return tiny_class_dict
+
+def create_augmentation_pipeline(augmentations, prob=1, max_right=25,
+                                max_left=25, mag=0.5):
+    """
+    Create a pipeline to add given augmentation with given parameters
+    """
+    possible_augments = ['rotation', 'erase', 'skew', 'shear', 'distortion',
+                        'gaussianDistortion']
+    p = Augmentor.Pipeline()
+    for augment in augmentations:
+        augment = ''.join(filter(lambda x: x.isalpha(), augment))
+        if augment in possible_augments:
+            if augment == 'rotation':
+                print('Adding rotation to pipeline')
+                p.rotate(probability=prob, max_left_rotation=max_left, max_right_rotation=max_right)
+            if augment == 'skew':
+                print('Adding skew tilt to pipeline')
+                p.skew_tilt(probability=prob, magnitude=mag)
+            if augment == 'shear':
+                print('Adding shear to pipeline')
+                p.shear(probability=prob, max_shear_left=max_left, max_shear_right=max_right)
+            if augment == 'distortion':
+                print('Adding distortion to pipeline')
+                p.random_distortion(probability=prob, grid_width=6, grid_height=6, magnitude=5)
+            if augment == 'gaussianDistortion':
+                print('Adding gaussian distortion to pipeline')
+                p.gaussian_distortion(probability=prob, grid_width=6, grid_height=6, magnitude=5,
+                                    corner="bell", method="in", mex=0.5, mey=0.5, sdx=0.05, sdy=0.05)
+            if augment == 'erase':
+                print('Adding random erasing to pipeline')
+                p.random_erasing(probability=prob, rectangle_area=mag)
+        else:
+            raise ValueError('The augmentation {} is invalid. Possible\
+                augmentations are (augmentations can be followed by digits):\n{}'
+            .format(augment, possible_augments))
+    return p
