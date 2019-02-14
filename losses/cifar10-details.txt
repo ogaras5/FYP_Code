@@ -49,3 +49,17 @@ Results for pretrained training skew30:
  Start epoch 31, End epoch 163, Training time 572m 36s, Best Validation accuracy 94.929999%
 Results for pretrained training shear30:
  Start epoch 31, End epoch 163, Training time 570m 28s, Best Validation accuracy 94.910002%
+Results for pretrained training skew60:
+ Start epoch 61, End epoch 163, Training time 418m 16s, Best Validation accuracy 94.400001%
+Results for pretrained training distortion30:
+ Start epoch 31, End epoch 163, Training time 484m 59s, Best Validation accuracy 93.660003%
+Results for pretrained training shear60:
+ Start epoch 61, End epoch 163, Training time 410m 36s, Best Validation accuracy 94.309998%
+Results for pretrained training distortion60:
+ Start epoch 61, End epoch 163, Training time 400m 55s, Best Validation accuracy 93.470001%
+Results for pretrained training gaussianDistortion30:
+ Start epoch 31, End epoch 163, Training time 1616m 45s, Best Validation accuracy 94.309998%
+Results for pretrained training skew90:
+ Start epoch 91, End epoch 163, Training time 289m 45s, Best Validation accuracy 94.069999%
+Results for pretrained training shear90:
+ Start epoch 91, End epoch 163, Training time 289m 28s, Best Validation accuracy 94.129997%
