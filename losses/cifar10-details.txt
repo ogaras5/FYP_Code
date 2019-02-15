@@ -63,3 +63,5 @@ Results for pretrained training skew90:
  Start epoch 91, End epoch 163, Training time 289m 45s, Best Validation accuracy 94.069999%
 Results for pretrained training shear90:
  Start epoch 91, End epoch 163, Training time 289m 28s, Best Validation accuracy 94.129997%
+Results for pretrained training distortion90:
+ Start epoch 91, End epoch 163, Training time 144m 31s, Best Validation accuracy 93.070000%
