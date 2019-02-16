@@ -65,3 +65,7 @@ Results for pretrained training shear90:
  Start epoch 91, End epoch 163, Training time 289m 28s, Best Validation accuracy 94.129997%
 Results for pretrained training distortion90:
  Start epoch 91, End epoch 163, Training time 144m 31s, Best Validation accuracy 93.070000%
+Results for pretrained training gaussianDistortion90:
+ Start epoch 91, End epoch 163, Training time 1094m 51s, Best Validation accuracy 93.690002%
+Results for pretrained training gaussianDistortion60:
+ Start epoch 61, End epoch 163, Training time 1519m 13s, Best Validation accuracy 93.940002%

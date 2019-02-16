@@ -34,7 +34,7 @@ parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
 # Arguments for Optimization options
 parser.add_argument('--epochs', default=25, type=int, metavar='N',
                     help='number of epochs to train')
-parser.add_argument('--start-epoch', default=31, type=int, metavar='N',
+parser.add_argument('--start-epoch', default=1, type=int, metavar='N',
                     help='epoch to start training on (must have checkpoint saved)')
 parser.add_argument('--valid-batch', default=100, type=int, metavar='N',
                     help='batch size for testing (default: 100)')
@@ -133,9 +133,7 @@ def main():
 
                     # Save predictions
                     y_true.extend(targets.cpu().numpy())
-                    print(len(y_true))
                     y_pred.extend(predictions.argmax(dim=1).cpu().numpy())
-                    print(len(y_pred))
 
                     # Update progress bar
                     progress.update(batch.shape[0], valid_loss)
@@ -147,27 +145,27 @@ def main():
             y_true = torch.tensor(y_true, dtype=torch.int64)
             y_pred = torch.tensor(y_pred, dtype=torch.int64)
             accuracy = torch.mean((y_pred == y_true).float())
-            valid_acc.append(accuracy)
+            valid_acc.append(float(accuracy)*100)
             print('Validation accuracy: {:4f}%'.format(float(accuracy)*100))
             if accuracy > best_acc:
                 best_acc = accuracy
 
             df = pd.DataFrame({
-                'epoch': range(args.start_epoch, len(train_losses) + args.start_epoch),
+                'epoch': range(args.start_epoch, len(valid_losses) + args.start_epoch),
                 'valid_acc': valid_acc,
-                'valid': valid_losses
+                'valid_loss': valid_losses
             })
             df.set_index('epoch', inplace=True)
             # Save to tmp csv file
-            df.to_csv("./losses/{}-{}-{}-tmp.csv".format(args.model_augmentation, args.augmentation, args.dataset))
-            fp = open('./losses/{}-{}-details-tmp.txt'.format(args.dataset, args.model_augmentation), 'w+')
+            df.to_csv("./losses/{}Model-{}-{}-tmp.csv".format(args.model_augmentation, args.augmentation, args.dataset))
+            fp = open('./losses/{}-{}Model-details-tmp.txt'.format(args.dataset, args.model_augmentation), 'w+')
             fp.write('\nResults for validating {} model:\n Start epoch {}, End epoch {}, Augmentation {}, Best Validation accuracy {:4f}%'.format(args.model_augmentation,
                     args.start_epoch, epoch,
     	            args.augmentation, float(best_acc)*100))
             fp.close()
 
         print('Best value Accuracy: {:4f}%'.format(float(best_acc)*100))
-        fp = open('./losses/{}-{}-details.txt'.format(args.dataset, args.model_augmentation), 'a+')
+        fp = open('./losses/{}-{}Model-details.txt'.format(args.dataset, args.model_augmentation), 'a+')
         fp.write('\nResults for validating {} model:\n Start epoch {}, End epoch {}, Augmentation {}, Best Validation accuracy {:4f}%'.format(args.model_augmentation,
                     args.start_epoch, args.start_epoch + args.epochs - 1,
     	            args.augmentation, float(best_acc)*100))
@@ -197,27 +195,30 @@ def main():
     df = pd.DataFrame({
         'epoch': range(args.start_epoch, len(valid_losses) + args.start_epoch),
         'valid_acc': valid_acc,
-        'valid': valid_losses
+        'valid_loss': valid_losses
     })
     df.set_index('epoch', inplace=True)
 
     # If starting from later epoch grab results already in csv file and make new dataframe
     if args.start_epoch != 1:
-        old_df = pd.read_csv('./losses/{}-{}-{}.csv'.format(args.model_augmentation, args.augmentation, args.dataset))
+        old_df = pd.read_csv('./losses/{}Model-{}-{}.csv'.format(args.model_augmentation, args.augmentation, args.dataset))
         old_df.set_index('epoch', inplace=True)
         df = old_df.join(df, on='epoch', how='outer', lsuffix='_df1', rsuffix='_df2')
         df.loc[df['valid_acc_df2'].notnull(), 'valid_acc_df1'] = df.loc[df['valid_acc_df2'].notnull(), 'valid_acc_df2']
-        df.loc[df['valid_df2'].notnull(), 'valid_df1'] = df.loc[df['valid_df2'].notnull(), 'valid_df2']
-        df.drop(['valid_acc_df2', 'valid_df2'], axis=1, inplace=True)
-        df.rename(columns={'valid_acc_df1': 'valid_acc', 'valid_df1': 'valid'}, inplace=True)
+        df.loc[df['valid_loss_df2'].notnull(), 'valid_loss_df1'] = df.loc[df['valid_loss_df2'].notnull(), 'valid_loss_df2']
+        df.drop(['valid_acc_df2', 'valid_loss_df2'], axis=1, inplace=True)
+        df.rename(columns={'valid_acc_df1': 'valid_acc', 'valid_loss_df1': 'valid_loss'}, inplace=True)
 
     # Save to csv file
-    df.to_csv("./losses/{}-{}-{}.csv".format(args.model_augmentation, args.augmentation, args.dataset))
+    df.to_csv("./losses/{}Model-{}-{}.csv".format(args.model_augmentation, args.augmentation, args.dataset))
 
     # Save accuracy to another csv for heatmap
     df2 = pd.DataFrame({
         'model_augmentation':args.model_augmentation,
-        args.augmentation:best_acc,
-    })
+        args.augmentation:float(best_acc)*100,
+    }, index=[0])
     df2.set_index('model_augmentation', inplace=True)
-    df2.to_csv("./losses/validate-{}-{}-{}.csv".format(args.model_augmentation, args.augmentation, args.dataset))    
+    df2.to_csv("./losses/validate-{}Model-{}-{}.csv".format(args.model_augmentation, args.augmentation, args.dataset))
+
+if __name__ == '__main__':
+    main()  

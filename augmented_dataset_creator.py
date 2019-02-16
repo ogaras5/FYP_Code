@@ -111,20 +111,14 @@ def run():
     print('Validation set Size: ', len(augmented_set))
 
     # DataLoaders
-    valid_loader = DataLoader(augmented_set, batch_size=100, num_workers=0, shuffle=False)
-
-    images_so_far = 0
-    num_of_images = 100
+    valid_loader = DataLoader(augmented_set, batch_size=100, num_workers=4, shuffle=False)
 
     # Loop through dataset once to create all required folders and images
     for i, (inputs, labels) in enumerate(valid_loader):
         inputs = inputs.to(device)
         labels = labels.to(device)
         for j in range(inputs.size()[0]):
-            images_so_far += 1
             imsave(inputs.cpu().data[j], labels.cpu().data[j].item(), meanVal, stdVal)
-            if images_so_far == num_of_images:
-                return
 
 if __name__ == '__main__':
     run()
