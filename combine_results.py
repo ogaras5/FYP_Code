@@ -9,7 +9,7 @@ parser.add_argument('-d', '--dataset', type=str, default='cifar10', help='Datase
 args = parser.parse_args()
 
 # Types of augmentations applied to the dataset
-augmentations = ['benchmark', 'distortion', 'rotation', 'shear', 'skew', 'erase', 'gaussianDistortion']
+augmentations = ['benchmark', 'rotation', 'shear', 'skew', 'erase', 'distortion', 'gaussianDistortion']
 
 # Pandas array to hold results for all dataset and models
 final_csv = pd.DataFrame()
