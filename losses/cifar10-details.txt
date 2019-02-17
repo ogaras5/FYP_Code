@@ -69,3 +69,5 @@ Results for pretrained training gaussianDistortion90:
  Start epoch 91, End epoch 163, Training time 1094m 51s, Best Validation accuracy 93.690002%
 Results for pretrained training gaussianDistortion60:
  Start epoch 61, End epoch 163, Training time 1519m 13s, Best Validation accuracy 93.940002%
+Results for training gaussianDistortion:
+ Start epoch 1, End epoch 163, Training time 1933m 22s, Best Validation accuracy 93.550003%
