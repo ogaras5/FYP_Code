@@ -146,7 +146,7 @@ def main():
                 # Forward propagate
                 predictions = model(batch)
 
-        		# Calculate the loss
+                # Calculate the loss
                 loss = criterion(predictions, targets)
 
                 # backpropagation to compute gradients
@@ -179,7 +179,7 @@ def main():
             valid_top5 = RunningAverage()
 
             # Keep track of predictions and actual labels
-	    y_true = []
+            y_true = []
             y_pred = []
 
             # We don't need gradients for validation, so wrap in no_grad to save memory
@@ -243,10 +243,10 @@ def main():
         print('Training complete in {:.0f}m {:.0f}s'.format(
                time_elapsed // 60, time_elapsed % 60))
         print('Best value Accuracy: {:4f}%'.format(float(best_acc)*100))
-	fp = open('./losses/imagenet-details.txt', 'a+')
-	fp.write('\nResults for training benchmark:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.start_epoch, args.start_epoch + args.epochs - 1,
-		          time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
-	fp.close()
+        fp = open('./losses/imagenet-details.txt', 'a+')
+        fp.write('\nResults for training benchmark:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.start_epoch, args.start_epoch + args.epochs - 1,
+                  time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
+        fp.close()
         return train_losses, train_top1s, train_top5s, valid_losses, valid_top1s, valid_top5s, y_pred
 
     # Evaluation of model
@@ -257,7 +257,7 @@ def main():
         valid_loss = RunningAverage()
         valid_top1 = RunningAverage()
         valid_top5 = RunningAverage()
-        
+
         # Monitor progress
         progress = MonitorProgress(total=len(valid_set))
 
@@ -286,7 +286,7 @@ def main():
                 prec1, prec5 = accuracy(predictions.data, targets.data, topk=(1,5))
                 valid_top1.update(prec1)
                 valid_top5.update(prec5)
-     
+
                 # Update progress bar
                 progress.update(batch.shape[0], valid_loss)
 
@@ -306,7 +306,7 @@ def main():
         y_pred = torch.tensor(y_pred, dtype=torch.int64)
         acc = torch.mean((y_pred == y_true).float())
         print('Validation accuracy: {:4f}%'.format(float(acc)*100))
-	return valid_losses, valid_top1s, valid_top5s, y_pred
+    return valid_losses, valid_top1s, valid_top5s, y_pred
 
     # Model with 200 class output
     print('Creating model...')
@@ -362,17 +362,17 @@ def main():
 
     # If starting from later epoch grab results already in csv file and make new dataframe
     if args.start_epoch != 1:
-    	old_df = pd.read_csv('./losses/benchmark-imagenet.csv')
-    	old_df.set_index('epoch', inplace=True)
-    	df = old_df.join(df, on='epoch', how='outer', lsuffix='_df1', rsuffix='_df2')
-    	df.loc[df['train_df2'].notnull(), 'train_df1'] = df.loc[df['train_df2'].notnull(), 'train_df2']
-    	df.loc[df['valid_df2'].notnull(), 'valid_df1'] = df.loc[df['valid_df2'].notnull(), 'valid_df2']
+        old_df = pd.read_csv('./losses/benchmark-imagenet.csv')
+        old_df.set_index('epoch', inplace=True)
+        df = old_df.join(df, on='epoch', how='outer', lsuffix='_df1', rsuffix='_df2')
+        df.loc[df['train_df2'].notnull(), 'train_df1'] = df.loc[df['train_df2'].notnull(), 'train_df2']
+        df.loc[df['valid_df2'].notnull(), 'valid_df1'] = df.loc[df['valid_df2'].notnull(), 'valid_df2']
         df.loc[df['train_top1_df2'].notnull(), 'train_top1_df1'] = df.loc[df['train_top1_df2'].notnull(), 'train_top1_df2']
-    	df.loc[df['valid_top1_df2'].notnull(), 'valid_top1_df1'] = df.loc[df['valid_top1_df2'].notnull(), 'valid_top1_df2']
+        df.loc[df['valid_top1_df2'].notnull(), 'valid_top1_df1'] = df.loc[df['valid_top1_df2'].notnull(), 'valid_top1_df2']
         df.loc[df['train_top5_df2'].notnull(), 'train_top5_df1'] = df.loc[df['train_top5_df2'].notnull(), 'train_top5_df2']
-    	df.loc[df['valid_top5_df2'].notnull(), 'valid_top5_df1'] = df.loc[df['valid_top5_df2'].notnull(), 'valid_top5_df2']
-    	df.drop(['train_df2', 'train_top1_df2', 'train_top5_df2', 'valid_df2', 'valid_top1_df2', 'valid_top5_df2'], axis=1, inplace=True)
-    	df.rename(columns={'train_df1': 'train', 'train_top1_df1': 'train_top1', 'train_top5_df1': 'train_top5', 'valid_df1': 'valid', 'valid_top1_df1': 'valid_top1', 'valid_top5_df1': 'valid_top5'}, inplace=True)
+        df.loc[df['valid_top5_df2'].notnull(), 'valid_top5_df1'] = df.loc[df['valid_top5_df2'].notnull(), 'valid_top5_df2']
+        df.drop(['train_df2', 'train_top1_df2', 'train_top5_df2', 'valid_df2', 'valid_top1_df2', 'valid_top5_df2'], axis=1, inplace=True)
+        df.rename(columns={'train_df1': 'train', 'train_top1_df1': 'train_top1', 'train_top5_df1': 'train_top5', 'valid_df1': 'valid', 'valid_top1_df1': 'valid_top1', 'valid_top5_df1': 'valid_top5'}, inplace=True)
 
     # Save to csv file
     df.to_csv("./losses/benchmark-imagenet.csv")
