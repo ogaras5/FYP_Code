@@ -56,7 +56,10 @@ class ImageNet32(Dataset):
             for f in _train_list:
                 file = os.path.join(self.root, _base_folder, f)
                 with open(file, 'rb') as fo:
-                    entry = pickle.load(fo, encoding='latin1')
+                    if sys.version.split(".")[0] == "3":
+                        entry = pickle.load(fo, encoding='latin1')
+                    else:
+                        entry = pickle.load(fo)
                     self.data.append(entry['data'])
                     self.labels += entry['labels']
             self.data = np.concatenate(self.data)
