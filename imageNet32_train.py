@@ -1,5 +1,8 @@
 """
-Script to train resnet model on imagenet
+Script to train resnet model on imagenet with image size of 32x32 pixels.
+Script can be used to train resnet model using no augmentation, i.e. benchmark for imagenet
+dataset, or for a single augmentation. Please ensure that the file structure is correct before 
+continue, otherwise checkpoints and results will not be saved and cause errors!
 """
 from __future__ import print_function
 import numpy as np
@@ -282,7 +285,7 @@ def main():
         fp.close()
         return train_losses, train_top1s, train_top5s, valid_losses, valid_top1s, valid_top5s, y_pred
 
-    # Model with 200 class output
+    # Model with 1000 class output
     print('Creating model...')
     model_res = models.resnet(depth=args.depth)
     if torch.cuda.device_count() > 1:

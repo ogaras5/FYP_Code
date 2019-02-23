@@ -41,9 +41,9 @@ class ImageNet32(Dataset):
         remap_labels (bool, optional): If True and exclude is not None, remaps
             remaining class labels so it is contiguous.
     """
-    def __init__(self, args, train=True, transform=None,
+    def __init__(self, root, train=True, transform=None,
                  target_transform=None):
-        self.root = os.path.expanduser(args.train_root)
+        self.root = os.path.expanduser(root)
         self.transform = transform
         self.target_transform = target_transform
         self.train = train  # Training set or validation set
