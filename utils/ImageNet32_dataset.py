@@ -1,4 +1,5 @@
 import os
+import sys
 import pickle
 
 import numpy as np
@@ -66,7 +67,10 @@ class ImageNet32(Dataset):
             f = _val_list[0]
             file = os.path.join(self.root, _base_folder, f)
             with open(file, 'rb') as fo:
-                entry = pickle.load(fo, encoding='latin1')
+                if sys.version.split(".")[0] == "3":
+                    entry = pickle.load(fo, encoding='latin1')
+                else:
+                    entry = pickle.load(fo)
                 self.data = entry['data']
                 self.labels = entry['labels']
             self.data = self.data.reshape((-1, 3, 32, 32))
