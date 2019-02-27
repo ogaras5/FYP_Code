@@ -1,0 +1,19 @@
+
+Results for training benchmark:
+ Start epoch 1, End epoch 30, Training time 2m 13s, Best Validation accuracy 13.410001%
+Results for training benchmark:
+ Start epoch 31, End epoch 163, Training time 9m 39s, Best Validation accuracy 47.209999%
+Results for training benchmark:
+ Start epoch 1, End epoch 163, Training time 11m 49s, Best Validation accuracy 46.759999%, Best Training accuracy 62.750000%
+Results for training benchmark:
+ Start epoch 1, End epoch 163, Training time 11m 49s, Best Validation accuracy 43.009999%, Best Training accuracy 60.350001%
+Results for training benchmark:
+ Start epoch 1, End epoch 163, Training time 11m 50s, Best Validation accuracy 45.609999%, Best Training accuracy 60.000002%
+Results for training rotation:
+ Start epoch 1, End epoch 163, Training time 16m 58s, Best Validation accuracy 49.849999%, Best Training accuracy 76.849997%
+Results for training skew:
+ Start epoch 1, End epoch 163, Training time 47m 12s, Best Validation accuracy 45.260000%, Best Training accuracy 59.299999%
+Results for training shear:
+ Start epoch 1, End epoch 163, Training time 48m 27s, Best Validation accuracy 49.129999%, Best Training accuracy 80.524999%
+Results for training erase:
+ Start epoch 1, End epoch 163, Training time 48m 5s, Best Validation accuracy 51.749998%, Best Training accuracy 93.199998%

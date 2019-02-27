@@ -1,0 +1,3 @@
+
+Results for training erase:
+ Start epoch 1, End epoch 163, Training time 48m 5s, Best Validation accuracy 51.749998%, Best Training accuracy 93.199998%
