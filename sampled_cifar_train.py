@@ -284,7 +284,7 @@ def main():
             fp = open('./losses/{}/{}_sample/{}-details-tmp.txt'.format(args.dataset, args.sample_size, args.dataset), 'w+')
             fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%, Best Training accuracy {:4f}%'.format(args.augmentation,
                     args.start_epoch, epoch,
-    	            time_elapsed // 60, time_elapsed % 60, float(best_valid_acc)*100), float(best_train_acc)*100))
+    	            time_elapsed // 60, time_elapsed % 60, float(best_valid_acc)*100, float(best_train_acc)*100))
             fp.close()
 
         # Give some details about how long the training took
@@ -293,9 +293,9 @@ def main():
                time_elapsed // 60, time_elapsed % 60))
         print('Best value Accuracy: {:4f}%'.format(float(best_acc)*100))
         fp = open('./losses/{}/{}_sample/{}-details.txt'.format(args.dataset, args.sample_size, args.dataset), 'a+')
-        fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
+        fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%, Best Training accuracy {:4f}%'.format(args.augmentation,
                     args.start_epoch, args.start_epoch + args.epochs - 1,
-    	            time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
+    	            time_elapsed // 60, time_elapsed % 60, float(best_valid_acc)*100, float(best_train_acc)*100))
         fp.close()
         return train_losses, valid_losses, y_pred
 
