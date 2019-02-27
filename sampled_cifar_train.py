@@ -162,7 +162,8 @@ def main():
         train_losses = []
         valid_losses = []
 
-        best_acc = 0.0
+        best_valid_acc = 0.0
+        best_train_acc = 0.0
 
         for epoch in range(args.start_epoch, args.start_epoch + num_epochs):
             print('Epoch: {}/{}'.format(epoch, args.start_epoch + num_epochs - 1))
@@ -178,6 +179,10 @@ def main():
 
             # Save Training data
             train_loss = MovingAverage()
+
+            # Save training predictions and true labels
+            y_pred = []
+            y_true = []
 
             for batch, targets in train_loader:
                 # Move the training data to the CPU
@@ -205,8 +210,20 @@ def main():
                 # Update progress bar
                 progress.update(batch.shape[0], train_loss)
 
+                # Save predictions and actual labels
+                y_true.extend(targets.cpu().numpy())
+                y_pred.extend(predictions.argmax(dim=1).cpu().numpy())
+
             print('Training Loss: ', train_loss)
             train_losses.append(train_loss.value)
+
+            # Calculate validation accuracy and see if it is the best accuracy
+            y_true = torch.tensor(y_true, dtype=torch.int64)
+            y_pred = torch.tensor(y_pred, dtype=torch.int64)
+            accuracy = torch.mean((y_pred == y_true).float())
+            print('Training accuracy: {:4f}%'.format(float(accuracy)*100))
+            if accuracy > best_train_acc:
+                best_train_acc = accuracy
 
             # Validation Phase
             model.eval()
@@ -243,8 +260,8 @@ def main():
             y_pred = torch.tensor(y_pred, dtype=torch.int64)
             accuracy = torch.mean((y_pred == y_true).float())
             print('Validation accuracy: {:4f}%'.format(float(accuracy)*100))
-            if accuracy > best_acc:
-                best_acc = accuracy
+            if accuracy > best_valid_acc:
+                best_valid_acc = accuracy
 
             # Save checkpoint
             checkpoint_filename = './checkpoints/{}/{}_sample/{}/{}-{}-{:03d}.pkl'.format(args.dataset,
@@ -265,9 +282,9 @@ def main():
             # Save details about time of training to tmp file
             time_elapsed = time.time() - since
             fp = open('./losses/{}/{}_sample/{}-details-tmp.txt'.format(args.dataset, args.sample_size, args.dataset), 'w+')
-            fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
+            fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%, Best Training accuracy {:4f}%'.format(args.augmentation,
                     args.start_epoch, epoch,
-    	            time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
+    	            time_elapsed // 60, time_elapsed % 60, float(best_valid_acc)*100), float(best_train_acc)*100))
             fp.close()
 
         # Give some details about how long the training took
