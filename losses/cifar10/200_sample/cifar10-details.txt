@@ -21,3 +21,7 @@ Results for training distortion:
  Start epoch 1, End epoch 163, Training time 20m 39s, Best Validation accuracy 52.310002%, Best Training accuracy 86.224997%
 Results for training gaussianDistortion:
  Start epoch 1, End epoch 163, Training time 91m 10s, Best Validation accuracy 51.490003%, Best Training accuracy 85.500002%
+Results for training benchmark2:
+ Start epoch 1, End epoch 163, Training time 21m 35s, Best Validation accuracy 49.140000%, Best Training accuracy 89.099997%
+Results for training rotation2:
+ Start epoch 1, End epoch 163, Training time 27m 11s, Best Validation accuracy 59.640002%, Best Training accuracy 80.900002%

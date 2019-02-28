@@ -108,7 +108,7 @@ def main():
     ])
 
     # Add augmentation to pipeline if wanted
-    if args.augmentation != "benchmark":
+    if ''.join(filter(lambda x: x.isalpha(), args.augmentation)) != "benchmark":
         # Add augmentation to pipeline (see utils/data_helpers.py for code)
         p = create_augmentation_pipeline(args.augmentation, args.probability, args.value, args.value, args.magnitude)
 
@@ -130,7 +130,7 @@ def main():
                                 transform=train_transform)
         valid_set = CIFAR10('/data/sarah/cifar_10', train=False,
                             download=True, transform=valid_transform)
-        if args.augmentation != "benchmark":
+        if ''.join(filter(lambda x: x.isalpha(), args.augmentation)) != "benchmark":
             augmented_set = ImageFolder('/data/sarah/cifar_10/{}_samples'.format(args.sample_size),
                                     transform=augment_transform)
             train_set = ConcatDataset((train_set, augmented_set))
@@ -140,7 +140,7 @@ def main():
                                 transform=train_transform)
         valid_set = CIFAR100('/data/sarah/cifar_100', train=False,
                              download=True, transform=valid_transform)
-        if args.augmentation != "benchmark":
+        if ''.join(filter(lambda x: x.isalpha(), args.augmentation)) != "benchmark":
             augmented_set = ImageFolder('/data/sarah/cifar_100/{}_samples'.format(args.sample_size),
                                         transform=augment_transform)
             train_set = ConcatDataset((train_set, augmented_set))
