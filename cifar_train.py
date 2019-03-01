@@ -208,7 +208,7 @@ def main():
             # Save checkpoint
             checkpoint_filename = './checkpoints/{}/benchmark-{}-{:03d}.pkl'.format(args.dataset, args.dataset, epoch)
             save_checkpoint(optimizer, model, epoch, checkpoint_filename)
-            
+
             # Save taining loss, and validation loss to a csv
             df = pd.DataFrame({
                 'epoch': range(args.start_epoch, len(train_losses) + args.start_epoch),
@@ -224,17 +224,17 @@ def main():
         print('Training complete in {:.0f}m {:.0f}s'.format(
                time_elapsed // 60, time_elapsed % 60))
         print('Best value Accuracy: {:4f}%'.format(float(best_acc)*100))
-	fp = open('./losses/{}-details.txt'.format(args.dataset), 'a+')
-	fp.write('\nResults for training benchmark:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.start_epoch, args.start_epoch + args.epochs - 1, 
-		time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
-	fp.close() 
+        fp = open('./losses/{}-details.txt'.format(args.dataset), 'a+')
+        fp.write('\nResults for training benchmark:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.start_epoch, args.start_epoch + args.epochs - 1,
+            time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
+        fp.close()
         return train_losses, valid_losses, y_pred
-    
+
     # Evaluation of model
     def test_model(model, criterion):
         # Validation Phase
         model.eval()
-        
+
         # Create progress bar
         progress = MonitorProgress(total=len(valid_set))
         valid_loss = RunningAverage()
@@ -255,13 +255,13 @@ def main():
 
                 # Calculate Loss
                 loss = criterion(predictions, targets)
-  
+
                 # Update running loss value
                 valid_loss.update(loss)
 
                 # Save predictions
                 y_pred.extend(predictions.argmax(dim=1).cpu().numpy())
-                
+
                 # Update progress bar
                 progress.update(batch.shape[0], valid_loss)
 
@@ -273,8 +273,8 @@ def main():
         y_pred = torch.tensor(y_pred, dtype=torch.int64)
         accuracy = torch.mean((y_pred == y_true).float())
         print('Validation accuracy: {:4f}%'.format(float(accuracy)*100))
-	return valid_losses, y_pred
-    
+    return valid_losses, y_pred
+
     # Model
     print('Creating model...')
     model_res = models.resnet(num_classes=num_classes, depth=args.depth)
@@ -302,8 +302,8 @@ def main():
     if args.evaluate:
         print('\nEvaluation only for epoch {}'.format(args.start_epoch))
         epoch = load_checkpoint(optimizer, model_res,
-				'./checkpoints/{}/benchmark-{}-{:03d}.pkl'
-				.format(args.dataset, args.dataset, args.start_epoch))
+                './checkpoints/{}/benchmark-{}-{:03d}.pkl'
+                .format(args.dataset, args.dataset, args.start_epoch))
         valid_losses, y_pred = test_model(model_res, criterion)
         return
 
@@ -323,13 +323,13 @@ def main():
 
     # If starting from later epoch grab results already in csv file and make new dataframe
     if args.start_epoch != 1:
-	old_df = pd.read_csv('./losses/benchmark-{}.csv'.format(args.dataset))
-	old_df.set_index('epoch', inplace=True)
-	df = old_df.join(df, on='epoch', how='outer', lsuffix='_df1', rsuffix='_df2')
-	df.loc[df['train_df2'].notnull(), 'train_df1'] = df.loc[df['train_df2'].notnull(), 'train_df2']
-	df.loc[df['valid_df2'].notnull(), 'valid_df1'] = df.loc[df['valid_df2'].notnull(), 'valid_df2']
-	df.drop(['train_df2', 'valid_df2'], axis=1, inplace=True)
-	df.rename(columns={'train_df1': 'train', 'valid_df1': 'valid'}, inplace=True)
+        old_df = pd.read_csv('./losses/benchmark-{}.csv'.format(args.dataset))
+        old_df.set_index('epoch', inplace=True)
+        df = old_df.join(df, on='epoch', how='outer', lsuffix='_df1', rsuffix='_df2')
+        df.loc[df['train_df2'].notnull(), 'train_df1'] = df.loc[df['train_df2'].notnull(), 'train_df2']
+        df.loc[df['valid_df2'].notnull(), 'valid_df1'] = df.loc[df['valid_df2'].notnull(), 'valid_df2']
+        df.drop(['train_df2', 'valid_df2'], axis=1, inplace=True)
+        df.rename(columns={'train_df1': 'train', 'valid_df1': 'valid'}, inplace=True)
 
     # Save to csv file
     df.to_csv("./losses/benchmark-{}.csv".format(args.dataset))

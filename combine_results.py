@@ -14,18 +14,18 @@ augmentations = ['benchmark', 'rotation', 'shear', 'skew', 'erase', 'distortion'
 # Pandas array to hold results for all dataset and models
 final_csv = pd.DataFrame()
 
-# Loop through each augmentation supplied for model 
+# Loop through each augmentation supplied for model
 for j, augmentation in enumerate(args.augmentation):
     result = []
     # Loop thorugh each augmentation of the dataset
     for i, augment in enumerate(augmentations):
         df = pd.read_csv('./losses/validate-{}Model-{}-{}.csv'.format(augmentation, augment, args.dataset))
         df.set_index('model_augmentation', inplace=True)
-	if i == 0:
+        if i == 0:
             result = df
         else:
             result = pd.concat([result, df], axis=1, sort=False)
     final_csv = final_csv.append(result)
 
 print(final_csv)
-final_csv.to_csv('./losses/validation-results-{}.csv'.format(args.dataset)) 
+final_csv.to_csv('./losses/validation-results-{}.csv'.format(args.dataset))

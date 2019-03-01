@@ -161,6 +161,8 @@ def main():
 
         train_losses = []
         valid_losses = []
+        train_accur = []
+        valid_accur = []
 
         best_valid_acc = 0.0
         best_train_acc = 0.0
@@ -221,6 +223,7 @@ def main():
             y_true = torch.tensor(y_true, dtype=torch.int64)
             y_pred = torch.tensor(y_pred, dtype=torch.int64)
             accuracy = torch.mean((y_pred == y_true).float())
+            train_accur.append(float(accuracy)*100)
             print('Training accuracy: {:4f}%'.format(float(accuracy)*100))
             if accuracy > best_train_acc:
                 best_train_acc = accuracy
@@ -259,6 +262,7 @@ def main():
             y_true = torch.tensor(valid_set.test_labels, dtype=torch.int64)
             y_pred = torch.tensor(y_pred, dtype=torch.int64)
             accuracy = torch.mean((y_pred == y_true).float())
+            valid_accur.append(float(accuracy)*100)
             print('Validation accuracy: {:4f}%'.format(float(accuracy)*100))
             if accuracy > best_valid_acc:
                 best_valid_acc = accuracy
@@ -273,7 +277,9 @@ def main():
             df = pd.DataFrame({
                 'epoch': range(args.start_epoch, len(train_losses) + args.start_epoch),
                 'train': train_losses,
-                'valid': valid_losses
+                'valid': valid_losses,
+                'train_acc': train_accur,
+                'valid_acc': valid_accur
             })
             df.set_index('epoch', inplace=True)
             # Save to tmp csv file
@@ -284,7 +290,7 @@ def main():
             fp = open('./losses/{}/{}_sample/{}-details-tmp.txt'.format(args.dataset, args.sample_size, args.dataset), 'w+')
             fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%, Best Training accuracy {:4f}%'.format(args.augmentation,
                     args.start_epoch, epoch,
-    	            time_elapsed // 60, time_elapsed % 60, float(best_valid_acc)*100, float(best_train_acc)*100))
+                    time_elapsed // 60, time_elapsed % 60, float(best_valid_acc)*100, float(best_train_acc)*100))
             fp.close()
 
         # Give some details about how long the training took
@@ -292,13 +298,13 @@ def main():
         print('Training complete in {:.0f}m {:.0f}s'.format(
                time_elapsed // 60, time_elapsed % 60))
         print('Best Validation Accuracy: {:4f}%'.format(float(best_valid_acc)*100))
-        print('Best Training Accuracy: {:4f}%'.format(float(best_train_acc)*100)) 
+        print('Best Training Accuracy: {:4f}%'.format(float(best_train_acc)*100))
         fp = open('./losses/{}/{}_sample/{}-details.txt'.format(args.dataset, args.sample_size, args.dataset), 'a+')
         fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%, Best Training accuracy {:4f}%'.format(args.augmentation,
                     args.start_epoch, args.start_epoch + args.epochs - 1,
-    	            time_elapsed // 60, time_elapsed % 60, float(best_valid_acc)*100, float(best_train_acc)*100))
+                    time_elapsed // 60, time_elapsed % 60, float(best_valid_acc)*100, float(best_train_acc)*100))
         fp.close()
-        return train_losses, valid_losses, y_pred
+        return train_losses, valid_losses, train_accur, valid_accur, y_pred
 
     # Model
     print('Creating model...')
@@ -327,14 +333,16 @@ def main():
     # Train model
     print('\nTraining and validating model for {} epoch{}...'
             .format(args.epochs, "s"[args.epochs==1:]))
-    train_losses, valid_losses, y_pred = train_model(model_res, criterion,
-                                                     optimizer, args.epochs)
+    train_losses, valid_losses, train_accur, valid_accur, y_pred = train_model(model_res, criterion,
+                                                                     optimizer, args.epochs)
 
     # Save taining loss, and validation loss to a csv
     df = pd.DataFrame({
         'epoch': range(args.start_epoch, len(train_losses) + args.start_epoch),
         'train': train_losses,
-        'valid': valid_losses
+        'valid': valid_losses,
+        'train_acc': train_accur,
+        'valid_acc': valid_accur
     })
     df.set_index('epoch', inplace=True)
 
@@ -345,8 +353,10 @@ def main():
         df = old_df.join(df, on='epoch', how='outer', lsuffix='_df1', rsuffix='_df2')
         df.loc[df['train_df2'].notnull(), 'train_df1'] = df.loc[df['train_df2'].notnull(), 'train_df2']
         df.loc[df['valid_df2'].notnull(), 'valid_df1'] = df.loc[df['valid_df2'].notnull(), 'valid_df2']
-        df.drop(['train_df2', 'valid_df2'], axis=1, inplace=True)
-        df.rename(columns={'train_df1': 'train', 'valid_df1': 'valid'}, inplace=True)
+        df.loc[df['train_acc_df2'].notnull(), 'train_acc_df1'] = df.loc[df['train_acc_df2'].notnull(), 'train_acc_df2']
+        df.loc[df['valid_acc_df2'].notnull(), 'valid_acc_df1'] = df.loc[df['valid_acc_df2'].notnull(), 'valid_acc_df2']
+        df.drop(['train_df2', 'valid_df2', 'valid_acc_df2', 'train_acc_df2'], axis=1, inplace=True)
+        df.rename(columns={'train_df1': 'train', 'valid_df1': 'valid', 'train_acc_df1': 'train_acc', 'valid_acc_df1': 'valid_acc'}, inplace=True)
 
     # Save to csv file
     df.to_csv('./losses/{}/{}_sample/{}-{}.csv'.format(args.dataset, args.sample_size, args.augmentation, args.dataset))

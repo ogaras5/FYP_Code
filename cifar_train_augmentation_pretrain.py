@@ -250,7 +250,7 @@ def main():
             fp = open('./losses/{}-details-tmp.txt'.format(args.dataset), 'w+')
             fp.write('\nResults for pretrained training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
                     args.start_epoch, epoch,
-    	            time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
+                    time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
             fp.close()
 
         # Give some details about how long the training took
@@ -261,7 +261,7 @@ def main():
         fp = open('./losses/{}-details.txt'.format(args.dataset), 'a+')
         fp.write('\nResults for pretrained training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
                     args.start_epoch, args.start_epoch + args.epochs - 1,
-    	            time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
+                    time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
         fp.close()
         return train_losses, valid_losses, y_pred
 

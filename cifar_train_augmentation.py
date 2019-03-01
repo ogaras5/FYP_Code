@@ -106,7 +106,7 @@ def main():
         transforms.Normalize([0.4914, 0.4822, 0.4465],
                              [0.2023, 0.1994, 0.2010]),
     ])
-    
+
     # transform for the validation data
     valid_transform = transforms.Compose([
         transforms.ToTensor(),
@@ -135,7 +135,7 @@ def main():
                              download=True, transform=valid_transform)
         num_classes = 100
     train_set = ConcatDataset((train_set, augmented_set))
-    
+
     # DataLoaders
     train_loader = DataLoader(train_set, batch_size=args.train_batch,
                               shuffle=True, num_workers=args.workers)
@@ -246,13 +246,13 @@ def main():
             df.set_index('epoch', inplace=True)
             # Save to tmp csv file
             df.to_csv("./losses/{}-{}-tmp.csv".format(args.augmentation, args.dataset))
-            
+
             # Save details about time of training to tmp file
             time_elapsed = time.time() - since
             fp = open('./losses/{}-details-tmp.txt'.format(args.dataset), 'w+')
             fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
                     args.start_epoch, epoch,
-    	            time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
+                    time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
             fp.close()
 
         # Give some details about how long the training took
@@ -263,7 +263,7 @@ def main():
         fp = open('./losses/{}-details.txt'.format(args.dataset), 'a+')
         fp.write('\nResults for training {}:\n Start epoch {}, End epoch {}, Training time {:.0f}m {:.0f}s, Best Validation accuracy {:4f}%'.format(args.augmentation,
                     args.start_epoch, args.start_epoch + args.epochs - 1,
-    	            time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
+                    time_elapsed // 60, time_elapsed % 60, float(best_acc)*100))
         fp.close()
         return train_losses, valid_losses, y_pred
 
@@ -339,8 +339,8 @@ def main():
     if args.evaluate:
         print('\nEvaluation only for epoch {}'.format(args.start_epoch))
         epoch = load_checkpoint(optimizer, model_res,
-				'./checkpoints/{}/{}-{}-{:03d}.pkl'
-				.format(args.dataset, args.augmentation, args.dataset, args.start_epoch))
+                './checkpoints/{}/{}-{}-{:03d}.pkl'
+                .format(args.dataset, args.augmentation, args.dataset, args.start_epoch))
         valid_losses, y_pred = test_model(model_res, criterion)
         return
 

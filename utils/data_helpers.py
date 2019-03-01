@@ -67,15 +67,15 @@ def create_200_class_imagenet(data_path, new_path):
             if not os.path.exists(new_train_path):
                 os.makedirs(new_train_path)
             for img in os.listdir(old_train_path):
-            	if not os.path.exists(os.path.join(new_train_path, img)):
+                if not os.path.exists(os.path.join(new_train_path, img)):
                     shutil.copy(os.path.join(old_train_path, img), new_train_path)
 
     meta_path = os.path.join(new_path, 'meta')
     if not os.path.exists(meta_path):
-	    os.makedirs(meta_path)
+        os.makedirs(meta_path)
     meta_path = os.path.join(meta_path, 'categories.json')
     with open(meta_path, 'w') as fp:
-	    json.dump(new_categories, fp, indent=4)
+        json.dump(new_categories, fp, indent=4)
 
 def class_extractor(class_list, data_path):
     """

@@ -161,14 +161,14 @@ def main():
             fp = open('./losses/{}-{}Model-details-tmp.txt'.format(args.dataset, args.model_augmentation), 'w+')
             fp.write('\nResults for validating {} model:\n Start epoch {}, End epoch {}, Augmentation {}, Best Validation accuracy {:4f}%'.format(args.model_augmentation,
                     args.start_epoch, epoch,
-    	            args.augmentation, float(best_acc)*100))
+                    args.augmentation, float(best_acc)*100))
             fp.close()
 
         print('Best value Accuracy: {:4f}%'.format(float(best_acc)*100))
         fp = open('./losses/{}-{}Model-details.txt'.format(args.dataset, args.model_augmentation), 'a+')
         fp.write('\nResults for validating {} model:\n Start epoch {}, End epoch {}, Augmentation {}, Best Validation accuracy {:4f}%'.format(args.model_augmentation,
                     args.start_epoch, args.start_epoch + args.epochs - 1,
-    	            args.augmentation, float(best_acc)*100))
+                    args.augmentation, float(best_acc)*100))
         fp.close()
         return valid_losses, y_pred, valid_acc, best_acc
 
@@ -221,4 +221,4 @@ def main():
     df2.to_csv("./losses/validate-{}Model-{}-{}.csv".format(args.model_augmentation, args.augmentation, args.dataset))
 
 if __name__ == '__main__':
-    main()  
+    main()
