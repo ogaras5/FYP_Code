@@ -35,3 +35,17 @@ Results for training distortion2:
  Start epoch 1, End epoch 163, Training time 20m 43s, Best Validation accuracy 56.400001%, Best Training accuracy 80.425000%
 Results for training gaussianDistortion2:
  Start epoch 1, End epoch 163, Training time 90m 53s, Best Validation accuracy 52.579999%, Best Training accuracy 91.500002%
+Results for training benchmark3:
+ Start epoch 1, End epoch 163, Training time 37m 11s, Best Validation accuracy 66.549999%, Best Training accuracy 95.249999%
+Results for training rotation3:
+ Start epoch 1, End epoch 163, Training time 168m 37s, Best Validation accuracy 71.219999%, Best Training accuracy 94.225001%
+Results for training erase3:
+ Start epoch 1, End epoch 163, Training time 169m 60s, Best Validation accuracy 74.460000%, Best Training accuracy 98.675001%
+Results for training skew3:
+ Start epoch 1, End epoch 163, Training time 169m 28s, Best Validation accuracy 69.959998%, Best Training accuracy 97.799999%
+Results for training shear3:
+ Start epoch 1, End epoch 163, Training time 168m 5s, Best Validation accuracy 70.660001%, Best Training accuracy 96.775001%
+Results for training distortion3:
+ Start epoch 1, End epoch 163, Training time 167m 47s, Best Validation accuracy 64.730000%, Best Training accuracy 92.325002%
+Results for training gaussianDistortion3:
+ Start epoch 1, End epoch 163, Training time 177m 16s, Best Validation accuracy 69.180000%, Best Training accuracy 98.175001%
