@@ -11,3 +11,5 @@ Results for training erase:
  Start epoch 1, End epoch 163, Training time 611m 4s, Best Validation accuracy 87.449998%, Best Training accuracy 98.844999%
 Results for training distortion:
  Start epoch 1, End epoch 163, Training time 607m 50s, Best Validation accuracy 84.030002%, Best Training accuracy 92.790002%
+Results for training gaussianDistortion:
+ Start epoch 1, End epoch 163, Training time 440m 24s, Best Validation accuracy 86.460000%, Best Training accuracy 97.130001%
