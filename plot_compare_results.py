@@ -18,13 +18,18 @@ parser.add_argument('-a', '--augmentations', default=['benchmark'], type=str, na
                     based on filename, e.g. rotation2, rotation30, etc (default: benchmark)')
 parser.add_argument('-p' '--pretrained', dest='pretrained', action='store_true',
                     help='Results contain pretrained models (default: false)')
+parser.add_argument('--accuracy', dest='accuracy', action='store_true',
+                    help='Plot accuracy curve for cifar datasets')
 
 args = parser.parse_args()
 
-# Setup path to csv file
 train_losses = []
 valid_losses = []
+train_acc = []
+valid_acc = []
+
 for augment in args.augmentations:
+    # Setup path to csv file
     filepath = '{}/{}-{}.csv'.format(args.filepath, augment, args.dataset)
     if args.pretrained and not os.path.exists(filepath):
         filepath = '{}/{}-{}-pretrain.csv'.format(args.filepath, augment, args.dataset)
@@ -32,9 +37,13 @@ for augment in args.augmentations:
     df = pd.read_csv(filepath)
     train_losses.append(df['train'])
     valid_losses.append(df['valid'])
+    if args.accuracy:
+        train_acc.append(df['train_acc'])
+        valid_acc.append(df['valid_acc'])
 
 # Plot the learning curve, and accuracy if using imagenet
 plotLosses(train_losses, valid_losses, args.augmentations)
+plotLosses(train_acc, valid_acc, args.augmentations)
 
 # TODO: Fix below to visualize accuracy for ImageNet
 # if args.dataset == 'imagenet':

@@ -15,7 +15,7 @@ parser.add_argument('-a', '--augmentation', default='benchmark', type=str,
                     help='Augementation to grab result for (default: benchmark)')
 parser.add_argument('-p' '--pretrained', dest='pretrained', action='store_true',
                     help='Use pretrained model results (default: false)')
-parser.add_argument('--accuracy', dest='accuraccy', action='storee_true',
+parser.add_argument('--accuracy', dest='accuracy', action='store_true',
                     help='Plot accuracy curve for cifar datasets')
 
 args = parser.parse_args()
