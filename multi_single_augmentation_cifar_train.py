@@ -195,13 +195,11 @@ def main():
             # Save training predictions and true labels
             y_pred = []
             y_true = []
-            total_img = 0
 
             for batch, targets in train_loader:
                 # Move the training data to the CPU
                 batch = batch.to(device)
                 targets = targets.to(device)
-                total_img += batch.shape[0]
 
                 # Clear the previous gradient computation
                 optimizer.zero_grad()
@@ -229,7 +227,6 @@ def main():
                 y_pred.extend(predictions.argmax(dim=1).cpu().numpy())
 
             print('Training Loss: ', train_loss)
-            print('Total training images:', total_img)
             train_losses.append(train_loss.value)
 
             # Calculate validation accuracy and see if it is the best accuracy
