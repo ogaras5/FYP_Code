@@ -1,0 +1,5 @@
+
+Results for training erase-rotation-skew-shear:
+ Start epoch 1, End epoch 30, Training time 26m 55s, Best Validation accuracy 60.009998%, Best Training accuracy 61.989999%
+Results for training erase-rotation-skew-shear:
+ Start epoch 31, End epoch 163, Training time 123m 32s, Best Validation accuracy 76.090002%, Best Training accuracy 97.920001%
