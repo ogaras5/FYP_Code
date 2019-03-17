@@ -113,14 +113,22 @@ def main():
 
     # Load datasets
     if args.dataset == 'cifar10':
-        train_set = ImageFolder('/data/sarah/cifar_10/{}_samples'.format(args.sample_size),
-                                transform=train_transform)
+        if args.sample_size == 5000:
+            train_set = CIFAR10('/data/sarah/cifar_10', train=True,
+                                    download=True, transform=train_transform)
+        else:
+            train_set = ImageFolder('/data/sarah/cifar_10/{}_samples'.format(args.sample_size),
+                                    transform=train_transform)
         valid_set = CIFAR10('/data/sarah/cifar_10', train=False,
                             download=True, transform=valid_transform)
         num_classes = 10
     else:
-        train_set = ImageFolder('/data/sarah/cifar_100/{}_samples'.format(args.sample_size),
-                                transform=train_transform)
+        if args.sample_size == 5000:
+            train_set = CIFAR100('/data/sarah/cifar_100', train=True,
+                                    download=True, transform=augment_transform)
+        else:
+            train_set = ImageFolder('/data/sarah/cifar_100/{}_samples'.format(args.sample_size),
+                                    transform=train_transform)
         valid_set = CIFAR100('/data/sarah/cifar_100', train=False,
                              download=True, transform=valid_transform)
         num_classes = 100
