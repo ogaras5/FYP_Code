@@ -1,0 +1,13 @@
+
+Results for training erase-rotation:
+ Start epoch 1, End epoch 163, Training time 77m 43s, Best Validation accuracy 71.759999%, Best Training accuracy 89.324999%
+Results for training erase-skew:
+ Start epoch 1, End epoch 163, Training time 77m 41s, Best Validation accuracy 72.070003%, Best Training accuracy 95.150000%
+Results for training erase-shear:
+ Start epoch 1, End epoch 163, Training time 77m 28s, Best Validation accuracy 73.250002%, Best Training accuracy 95.324999%
+Results for training rotation-erase:
+ Start epoch 1, End epoch 163, Training time 78m 28s, Best Validation accuracy 71.399999%, Best Training accuracy 91.275001%
+Results for training skew-erase:
+ Start epoch 1, End epoch 163, Training time 78m 21s, Best Validation accuracy 75.360000%, Best Training accuracy 96.300000%
+Results for training shear-erase:
+ Start epoch 1, End epoch 163, Training time 78m 16s, Best Validation accuracy 73.019999%, Best Training accuracy 95.999998%
