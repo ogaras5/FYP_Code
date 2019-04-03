@@ -2,11 +2,11 @@
 All code relating to my final year project: "Exploring data augmentation strategies for deep learning"
 
 ## Main Training Scripts
-A brief description of the main scripts utilised throughout the project to train models is given below. Each script is linked to a set of experiments carried out over the course of the project, which can be linked back to the FYP report. Amy scripts relating to trainng a resnet model usign the CIFAR-10/CIFAR-100 dataset, require the use of the custom model in './models/resnet_cifar.py'. All scripts use an absolute path to the dataset folder, which must be changed to allow use of the scripts based on User's dataset location.
+A brief description of the main scripts utilised throughout the project to train models is given below. Each script is linked to a set of experiments carried out over the course of the project, which can be linked back to the FYP report. Amy scripts relating to trainng a resnet model usign the CIFAR-10/CIFAR-100 dataset, require the use of the custom model in './model/resnet_cifar.py'. All scripts use an absolute path to the dataset folder, which must be changed to allow use of the scripts based on User's dataset location.
 ### cifar_train.py
 Script to train resnet model on CIFAR-10/CIFAR-100 dataset. This generates benchmark results and cannot be used to train with augmentations.
 
-### imagenet_traain.py
+### imagenet_train.py
 Script to train resnet model on 200 class ImageNet dataset. This generates benchmark results and cannot be used to train with augmentations.
 
 ### cifar_train_augmentation.py
