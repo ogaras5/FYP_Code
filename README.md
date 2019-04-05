@@ -1,5 +1,6 @@
 # FYP_Code
-All code relating to my final year project: "Exploring data augmentation strategies for deep learning"
+All code relating to my final year project: "Exploring data augmentation strategies for deep learning".
+Note trained models can be found in './trained_models' with a list of the accuracy achieved by the model for the CIFAR10 validation dataset available in './trained_models/modelAccuracies.md'.
 
 ## Main Training Scripts
 A brief description of the main scripts utilised throughout the project to train models is given below. Each script is linked to a set of experiments carried out over the course of the project, which can be linked back to the FYP report. Amy scripts relating to trainng a resnet model usign the CIFAR-10/CIFAR-100 dataset, require the use of the custom model in './model/resnet_cifar.py'. All scripts use an absolute path to the dataset folder, which must be changed to allow use of the scripts based on User's dataset location.
