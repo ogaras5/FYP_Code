@@ -31,7 +31,7 @@ parser.add_argument('-d', '--dataset', default='cifar10', type=str,
                     help='dataset to use for training, either cifar10 or cifar100 (default: cifar10)')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
-# Arguments for Optimization options
+# Arguments for Validaation options
 parser.add_argument('--epochs', default=25, type=int, metavar='N',
                     help='number of epochs to train')
 parser.add_argument('--start-epoch', default=1, type=int, metavar='N',
@@ -45,6 +45,8 @@ parser.add_argument('--augmentation', type=str, default='rotation',
                     help='Type of augmentation to apply to the dataset')
 parser.add_argument('--model-augmentation', type=str, default='rotation',
                     help='Type of augmentation used to train model')
+parser.add_argument('--pretrained', dest='pretrained', action='store_true',
+                    help='Validate on a model trained using pretrained model')
 # Arguments for miscellaneous
 parser.add_argument('--manualSeed', type=int, default=12345, help='manual seed (default: 12345)')
 parser.add_argument('--gpu-id', default='0', type=str,
@@ -98,9 +100,15 @@ def main():
         best_acc = 0.0
 
         for epoch in range(args.start_epoch, args.start_epoch + num_epochs):
-            cur_epoch = load_checkpoint(optimizer, model,
-                            './checkpoints/{}/{}-{}-{:03d}.pkl'
-                            .format(args.dataset, args.model_augmentation, args.dataset, epoch))
+            if args.pretrained:
+                augment = ''.join(filter(lambda x: x.isalpha(), args.model_augmentation))
+                cur_epoch = load_checkpoint(optimizer, model,
+                                './checkpoints/{}/pretrain/{}/{}-{}-{:03d}.pkl'
+                                .format(args.dataset, augment, args.model_augmentation, args.dataset, epoch))
+            else:
+                cur_epoch = load_checkpoint(optimizer, model,
+                                './checkpoints/{}/{}-{}-{:03d}.pkl'
+                                .format(args.dataset, args.model_augmentation, args.dataset, epoch))
 
             print('Epoch: {}/{}'.format(epoch, args.start_epoch + num_epochs - 1))
 
@@ -200,7 +208,7 @@ def main():
     df.set_index('epoch', inplace=True)
 
     # If starting from later epoch grab results already in csv file and make new dataframe
-    if args.start_epoch != 1:
+    if args.start_epoch != 1 and os.path.exists('./losses/{}Model-{}-{}.csv'.format(args.model_augmentation, args.augmentation, args.dataset)):
         old_df = pd.read_csv('./losses/{}Model-{}-{}.csv'.format(args.model_augmentation, args.augmentation, args.dataset))
         old_df.set_index('epoch', inplace=True)
         df = old_df.join(df, on='epoch', how='outer', lsuffix='_df1', rsuffix='_df2')
