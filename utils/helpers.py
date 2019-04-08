@@ -60,7 +60,10 @@ def load_checkpoint(optimizer, model, filename):
     """
     Function to load saved checkpoints
     """
-    checkpoint_dict = torch.load(filename)
+    if not torch.cuda.is_available():
+        checkpoint_dict = torch.load(filename, map_location=lambda storage, loc: storage)
+    else:
+        checkpoint_dict = torch.load(filename)
     epoch = checkpoint_dict['epoch']
     model.load_state_dict(checkpoint_dict['model'])
     if optimizer is not None:
