@@ -32,5 +32,6 @@ found for the CIFAR-10 Validation dataset.
 | ------------------- |:----------------:|
 | Skew                | 94.97 %          |
 | Shear               | 94.87 %          |
+| Random Erase        | 95.05 %          |
 | Random Distortion   | 93.71 %          |
 | Gaussian Distortion | 94.30 %          |
