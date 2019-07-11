@@ -23,7 +23,7 @@ Script to train resnet model on CIFAR-10/CIFAR-100 dataset using pretrained mode
 Script to apply one/more augmentations to the CIFAR-10/CIFAR-100 dataset to train resnet model. The dataset is doubled in size, with all augmentations listed being applied with a probability of 1 to the original dataset.
 
 ### sampled_cifar_train.py
-Script to train resnet model on sampled versions of CIFAR-110/CIFAR-100 dataset. Script can be used to generate benchmark model, or model trained using single augmentation dataset.
+Script to train resnet model on sampled versions of CIFAR-10/CIFAR-100 dataset. Script can be used to generate benchmark model, or model trained using single augmentation dataset.
 
 ### multi_single_augmentation_train.py
 Script to apply one/more augmentations to the CIFAR-10/CIFAR-100 dataset to train resnet model. Each augmentation listed is applied to the dataset individually, with the final training dataset being the concatenation of all augmented datasets created.
