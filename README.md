@@ -1,9 +1,9 @@
 # FYP_Code
-All code relating to my final year project: "Exploring data augmentation strategies for deep learning".
+All code relating to my final year project: "Exploring data augmentation strategies for deep learning". A subset of the below source code (mainly CIFAR related code) is used for work on the paper: "Comparing Data Augmentation Strategies for Deep Image Classiﬁcation".
 Note trained models can be found in './trained_models' with a list of the accuracy achieved by the model for the CIFAR10 validation dataset available in './trained_models/modelAccuracies.md'.
 
 ## Main Training Scripts
-A brief description of the main scripts utilised throughout the project to train models is given below. Each script is linked to a set of experiments carried out over the course of the project, which can be linked back to the FYP report. Amy scripts relating to trainng a resnet model usign the CIFAR-10/CIFAR-100 dataset, require the use of the custom model in './model/resnet_cifar.py'. All scripts use an absolute path to the dataset folder, which must be changed to allow use of the scripts based on User's dataset location.
+A brief description of the main scripts utilised throughout the project to train models is given below. Each script is linked to a set of experiments carried out over the course of the project, which can be linked back to the FYP report. Any scripts relating to training a resnet model using the CIFAR-10/CIFAR-100 dataset, require the use of the custom model in './model/resnet_cifar.py'. All scripts use an absolute path to the dataset folder, which must be changed to allow use of the scripts based on User's dataset location.
 ### cifar_train.py
 Script to train resnet model on CIFAR-10/CIFAR-100 dataset. This generates benchmark results and cannot be used to train with augmentations.
 
@@ -35,7 +35,7 @@ Script to train resnet model on ImageNet dataset with image resolution of 32x32 
 The scripts listed below allow for the creation of datasets based on the ImageNet and CIFAR-10/CIFAR-100 datasets. The scripts require the original datsets to be available to alloww for the creation of the altered datasets.
 
 ### buildDataset.py
-Creates 200 class imagenet dataset using helper scripts available in './utils'. A json file containing the 200 classes in Tiny-ImageNet-200 and a json file containing the classes in ImageNet must be available for this script to work. 
+Creates 200 class ImageNet dataset using helper scripts available in './utils'. A json file containing the 200 classes in Tiny-ImageNet-200 and a json file containing the classes in ImageNet must be available for this script to work. 
 
 ### augmentation_dataset_creator.py
 Creates validation dataset for CIFAR-10/CIFAR-100 dataset. Can apply a given augmentaiton to the created dataset.
@@ -65,5 +65,5 @@ Contains th helper methods:
 * add_augmentation - Adds the desired augmentation to the dataset pipeline
 
 ### progress.py
-Creates a progress bar in the coomand line to show the current progress for processing the dataset for the current epoch.
+Creates a progress bar in the command line to show the current progress for processing the dataset for the current epoch.
 
